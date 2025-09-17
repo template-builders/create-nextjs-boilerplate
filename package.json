@@ -1,0 +1,9 @@
+{
+  "name": "@template-builders/create-nextjs-boilerplate",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "nextjs-boilerplate": "bin/init-app.js"
+  },
+  "publishConfig": { "access": "public" }
+}
