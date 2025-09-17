@@ -1,5 +1,5 @@
 {
-  "name": "@template-builders/create-nextjs-boilerplate",
+  "name": "@starter-templates/create-nextjs-boilerplate",
   "version": "1.0.0",
   "type": "module",
   "bin": {
