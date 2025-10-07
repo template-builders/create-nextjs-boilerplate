@@ -1,9 +1,11 @@
 {
   "name": "@starter-templates/create-nextjs-boilerplate",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "bin": {
     "nextjs-boilerplate": "bin/init-app.js"
   },
-  "publishConfig": { "access": "public" }
+  "publishConfig": {
+    "access": "public"
+  }
 }
