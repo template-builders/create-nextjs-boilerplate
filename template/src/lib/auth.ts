@@ -1,14 +1,37 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { username } from "better-auth/plugins";
+import { emailOTP, twoFactor, phoneNumber } from "better-auth/plugins";
+import { passkey } from "better-auth/plugins/passkey";
 import { db } from "@/db"; 
+import * as schema from "@/db/auth"
+import { verificationEmail, otpEmail, resetPassword } from "./resend/password";
 
 export const auth = betterAuth({
+    account: {
+        accountLinking: {
+            enabled: true
+        }
+    },
     database: drizzleAdapter(db, {
-        provider: "pg"
+        provider: "pg",
+        schema
     }),
     emailAndPassword: {
-        enabled: true
+        enabled: true,
+        requireEmailVerification: true,
+        sendResetPassword: async ({user, url, token}, request) => {
+            await resetPassword(user.email, url)
+        },
+        onPasswordReset: async ({ user }, request) => {
+            console.log(`Password for user ${user.email} has been reset.`);
+        },
+    },
+    emailVerification: {
+      sendVerificationEmail: async ({user, url, token}, request) => {
+        await verificationEmail(user, url)
+      },
+      sendOnSignUp: true,
+      autoSignInAfterVerification: true
     },
     socialProviders: {
         github: {
@@ -21,10 +44,27 @@ export const auth = betterAuth({
         },
         discord: {
             clientId: process.env.DISCORD_CLIENT_ID!,
-            clientSecret: process.env.DISCORD_CLIENT_SECRET,
+            clientSecret: process.env.DISCORD_CLIENT_SECRET!,
         },
     },
     plugins: [
-        username()
+        phoneNumber(),
+        emailOTP({
+            otpLength: 8,
+            expiresIn: 300,
+            async sendVerificationOTP({email, otp, type}) {
+                const data = await otpEmail(email, otp)
+            },
+        }),
+        twoFactor({
+            otpOptions: {
+                digits: 8,
+                async sendOTP ({user, otp}, request) {
+                    const data = await otpEmail(user.email, otp)
+                },
+                
+            }
+        }),
+        passkey()
     ]
 });
