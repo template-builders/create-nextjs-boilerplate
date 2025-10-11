@@ -11,6 +11,8 @@ import { authClient } from "@/lib/auth-client"
 import { TabsComponentProps } from "./page"
 import { PasswordForm } from "./passwordForm"
 import { toast } from "sonner"
+import { motion } from "framer-motion"
+import { User, Monitor, Smartphone, Tablet, Key, Link as LinkIcon, Unlink } from "lucide-react"
 
 function formatTimeElapsed(createdAt: Date): string {
   const seconds = Math.floor((new Date().getTime() - createdAt.getTime()) / 1000)
@@ -95,113 +97,236 @@ export const MainDetails = ({data}: TabsComponentProps) => {
     })
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.1
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    }
+  }
+
+  const getDeviceIcon = (type: string) => {
+    switch (type) {
+      case 'Desktop': return <Monitor className="w-5 h-5" />
+      case 'Phone': return <Smartphone className="w-5 h-5" />
+      case 'Tablet': return <Tablet className="w-5 h-5" />
+      default: return <Monitor className="w-5 h-5" />
+    }
+  }
+
   return (
-    <div className="flex flex-col pt-4 gap-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
-          <CardDescription>Update your profile details</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Separator />
+    <motion.div 
+      className="flex flex-col gap-8"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div variants={itemVariants}>
+        <Card className="hover:shadow-lg transition-all duration-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5 text-primary" />
+              Personal Information
+            </CardTitle>
+            <CardDescription>Update your profile details and account information</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <Separator />
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input id="firstName" placeholder="John" />
+            <div className="grid gap-4 md:grid-cols-2">
+              <motion.div 
+                className="space-y-2"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
+                <Label htmlFor="firstName">First Name</Label>
+                <Input id="firstName" placeholder="John" className="transition-all duration-200 focus:ring-2 focus:ring-primary/20" />
+              </motion.div>
+              <motion.div 
+                className="space-y-2"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              >
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input id="lastName" placeholder="Doe" className="transition-all duration-200 focus:ring-2 focus:ring-primary/20" />
+              </motion.div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input id="lastName" placeholder="Doe" />
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="john.doe@example.com" />
-          </div>
-          <div className="flex justify-between gap-4">
-            <PasswordForm data={data}/>
-            <div className="flex gap-4">
-              <Button variant="outline">Cancel</Button>
-              <Button>Save Changes</Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Sessions</CardTitle>
-          <CardDescription>Manage your active login sessions</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {sessions.map((session) => (
-            <div className="flex items-center justify-between p-4 border rounded-lg border-border">
-              <div className="flex items-center gap-3">
-                <FontAwesomeIcon icon={sessionIconMap[session.type]}/>
-                <div>
-                  <p className="font-medium">{session.type}, {session.browser}</p>
-                  <p className="text-sm text-muted-foreground">{session.current ? "Current Session" : formatTimeElapsed(session.createdAt)}</p>
-                </div>
+            <motion.div 
+              className="space-y-2"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" placeholder="john.doe@example.com" className="transition-all duration-200 focus:ring-2 focus:ring-primary/20" />
+            </motion.div>
+            
+            <div className="flex justify-between gap-4">
+              <PasswordForm data={data}/>
+              <div className="flex gap-4">
+                <Button variant="outline" className="hover:bg-accent/50 transition-all duration-200">Cancel</Button>
+                <Button className="hover:bg-primary/90 transition-all duration-200">Save Changes</Button>
               </div>
-              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" disabled={session.current} onClick={() => revokeActiveSession(session.token)}>
-                Revoke Session
-              </Button>
             </div>
-          ))}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Passkeys</CardTitle>
-          <CardDescription>Manage your passkeys for passwordless authentication</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FontAwesomeIcon icon={faKey} />
-              <span className="text-sm font-medium">Passkeys [{data.passkeys.length}]</span>
-            </div>
-            <PasskeyForm data={data}></PasskeyForm>
-          </div>
-          {data.passkeys.map((passkey) => (
-            <div className="flex items-center justify-between p-4 border rounded-lg border-border">
-              <div className="flex items-center gap-3">
-                <FontAwesomeIcon icon={faKey} />
-                <div>
-                  <p className="font-medium">{passkey.name}</p>
-                  <p className="text-sm text-muted-foreground">Added on {passkey.createdAt.toLocaleDateString("en-us", {day: "numeric", month: "long", year: "numeric"})}</p>
+      <motion.div variants={itemVariants}>
+        <Card className="hover:shadow-lg transition-all duration-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Monitor className="w-5 h-5 text-primary" />
+              Active Sessions
+            </CardTitle>
+            <CardDescription>Manage your active login sessions across devices</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {sessions.map((session, index) => (
+              <motion.div 
+                key={session.token}
+                className="flex items-center justify-between p-4 border rounded-lg border-border hover:bg-accent/5 transition-all duration-200"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    {getDeviceIcon(session.type)}
+                  </div>
+                  <div>
+                    <p className="font-medium">{session.type}, {session.browser}</p>
+                    <p className="text-sm text-muted-foreground">{session.current ? "Current Session" : formatTimeElapsed(session.createdAt)}</p>
+                  </div>
                 </div>
-              </div>
-              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => removePasskey(passkey.id)}>
-                Remove
-              </Button>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200" 
+                  disabled={session.current} 
+                  onClick={() => revokeActiveSession(session.token)}
+                >
+                  {session.current ? "Current" : "Revoke"}
+                </Button>
+              </motion.div>
+            ))}
+          </CardContent>
+        </Card>
+      </motion.div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Connected Accounts</CardTitle>
-          <CardDescription>Manage your social sign-in connections</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-        {socialsList.map((social) => (
-          <div className="flex items-center justify-between p-4 border rounded-lg border-border">
-            <div className="flex items-center gap-3">
-              <FontAwesomeIcon icon={social.icon} size="xl"/>
-              <div className="font-bold">{social.provider}</div>
+      <motion.div variants={itemVariants}>
+        <Card className="hover:shadow-lg transition-all duration-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="w-5 h-5 text-primary" />
+              Passkeys
+            </CardTitle>
+            <CardDescription>Manage your passkeys for secure, passwordless authentication</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Key className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Passkeys [{data.passkeys.length}]</span>
+              </div>
+              <PasskeyForm data={data}></PasskeyForm>
             </div>
-            <Button variant="outline" size="sm" onClick={social.connected ? () => unlinkSocialProvider(social.provider) : () => linkSocialProvider(social.provider)}>
-              {social.connected ? "Unlink Account" : "Link Account"}
-            </Button>
-          </div>
-        ))}
-        </CardContent>
-      </Card>
-    </div>
+            {data.passkeys.map((passkey, index) => (
+              <motion.div 
+                key={passkey.id}
+                className="flex items-center justify-between p-4 border rounded-lg border-border hover:bg-accent/5 transition-all duration-200"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Key className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{passkey.name}</p>
+                    <p className="text-sm text-muted-foreground">Added on {passkey.createdAt.toLocaleDateString("en-us", {day: "numeric", month: "long", year: "numeric"})}</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200" 
+                  onClick={() => removePasskey(passkey.id)}
+                >
+                  Remove
+                </Button>
+              </motion.div>
+            ))}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <Card className="hover:shadow-lg transition-all duration-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <LinkIcon className="w-5 h-5 text-primary" />
+              Connected Accounts
+            </CardTitle>
+            <CardDescription>Manage your social sign-in connections and integrations</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {socialsList.map((social, index) => (
+              <motion.div 
+                key={social.provider}
+                className="flex items-center justify-between p-4 border rounded-lg border-border hover:bg-accent/5 transition-all duration-200"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <FontAwesomeIcon icon={social.icon} size="lg" className="text-primary"/>
+                  </div>
+                  <div className="font-bold">{social.provider}</div>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="transition-all duration-200 hover:bg-accent/50"
+                  onClick={social.connected ? () => unlinkSocialProvider(social.provider) : () => linkSocialProvider(social.provider)}
+                >
+                  {social.connected ? (
+                    <>
+                      <Unlink className="w-4 h-4 mr-2" />
+                      Unlink
+                    </>
+                  ) : (
+                    <>
+                      <LinkIcon className="w-4 h-4 mr-2" />
+                      Link
+                    </>
+                  )}
+                </Button>
+              </motion.div>
+            ))}
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   )
 }
