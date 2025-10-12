@@ -2,11 +2,30 @@
 import { useUserData, UserData } from "./fetchData"
 import { MainDetails } from "./mainDetails"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
-import { User, Settings, Shield } from "lucide-react"
+import { User, Settings, Shield, LogOut } from "lucide-react"
+import { authClient } from "@/lib/auth-client"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export default function ProfilePage() {
   const userData = useUserData()
+  const router = useRouter()
+
+  const logout = async () => {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          toast.success("Signed out of current session")
+          router.push("/")
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message || "Failed to sign out")
+        }
+      }
+    })
+  }
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -59,6 +78,19 @@ export default function ProfilePage() {
               <p className="text-muted-foreground">Manage your account and preferences</p>
             </div>
           </div>
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Button 
+              variant="outline" 
+              onClick={logout}
+              className="flex items-center gap-2 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </Button>
+          </motion.div>
         </motion.div>
 
         <motion.div variants={itemVariants}>

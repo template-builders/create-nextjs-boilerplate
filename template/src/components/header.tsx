@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { ModeToggle } from "./theme-provider"
 import { authClient } from "@/lib/auth-client"
 import { useEffect, useState } from "react"
-import { toast } from "sonner"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
@@ -37,20 +36,6 @@ export function Header() {
 
   const handleHomeClick = () => {
     router.push("/")
-  }
-
-  const logout = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          toast.success("Signed out of current session")
-          router.push("/")
-        },
-        onError: (ctx) => {
-          toast.error(ctx.error.message || "Failed to sign out")
-        }
-      }
-    })
   }
 
   return (
@@ -145,18 +130,16 @@ export function Header() {
           
           {session.data && session.data.user ? (
             <div className="hidden md:flex gap-4">
+              <Link href="/dashboard">
+                <Button variant="outline" className="bg-transparent hover:bg-accent/50 transition-all duration-200">
+                  Dashboard
+                </Button>
+              </Link>
               <Link href="/profile">
                 <Button variant="outline" className="bg-transparent hover:bg-accent/50 transition-all duration-200">
                   Profile
                 </Button>
               </Link>
-              <Button 
-                variant="outline" 
-                className="bg-transparent hover:bg-accent/50 transition-all duration-200" 
-                onClick={logout}
-              >
-                Sign Out
-              </Button>
             </div>
           ) : (
             <div className="hidden md:flex gap-4">
@@ -173,7 +156,6 @@ export function Header() {
             </div>
           )}
 
-          {/* Mobile menu button */}
           <Button
             variant="ghost"
             size="icon"
@@ -207,7 +189,6 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -322,21 +303,16 @@ export function Header() {
               <div className="pt-4 border-t border-border">
                 {session.data && session.data.user ? (
                   <div className="flex flex-col space-y-2">
+                    <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full bg-transparent">
+                        Dashboard
+                      </Button>
+                    </Link>
                     <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button variant="outline" className="w-full bg-transparent">
                         Profile
                       </Button>
                     </Link>
-                    <Button 
-                      variant="outline" 
-                      className="w-full bg-transparent" 
-                      onClick={() => {
-                        logout()
-                        setIsMobileMenuOpen(false)
-                      }}
-                    >
-                      Sign Out
-                    </Button>
                   </div>
                 ) : (
                   <div className="flex flex-col space-y-2">
