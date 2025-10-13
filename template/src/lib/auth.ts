@@ -1,17 +1,19 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP, twoFactor, phoneNumber } from "better-auth/plugins";
+import { stripe } from "@better-auth/stripe"
 import { passkey } from "better-auth/plugins/passkey";
 import { db } from "@/db"; 
 import * as schema from "@/db/auth"
 import { verificationEmail, otpEmail, resetPassword } from "./resend/password";
-
+import { stripeClient } from "./stripe";
 export const auth = betterAuth({
     account: {
         accountLinking: {
             enabled: true
         }
     },
+    trustedOrigins: [`https://${process.env.NGROK_DOMAIN}`, `${process.env.BETTER_AUTH_URL}`],
     database: drizzleAdapter(db, {
         provider: "pg",
         schema
@@ -64,6 +66,14 @@ export const auth = betterAuth({
                 },
                 
             }
+        }),
+        stripe({
+            stripeClient,
+            stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
+            createCustomerOnSignUp: true,
+            // subscription: {
+            //     enabled: true,
+            // }
         }),
         passkey()
     ]
