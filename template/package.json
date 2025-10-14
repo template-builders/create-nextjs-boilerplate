@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "expose": "tsx scripts/ngrok.ts",
+    "expose": "concurrently \"tsx scripts/smee.ts\" \"tsx scripts/stripe.ts\"",
+    "expose:github": "tsx scripts/smee.ts",
+    "expose:stripe": "tsx scripts/stripe.ts",
     "migrate:gen": "drizzle-kit generate",
     "migrate:dev": "dotenv -e .env tsx scripts/migrate.ts",
     "migrate:prod": "dotenv -e .env.prod tsx scripts/migrate.ts"
@@ -47,6 +49,7 @@
     "react-email": "^4.2.11",
     "react-hook-form": "^7.63.0",
     "resend": "^6.1.0",
+    "smee-client": "^4.3.1",
     "sonner": "^2.0.7",
     "stripe": "^18.5.0",
     "tailwind-merge": "^3.3.1",

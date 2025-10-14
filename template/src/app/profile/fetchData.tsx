@@ -28,11 +28,12 @@ export function useUserData() {
   const query = useQuery({
     queryKey: ["user-data"],
     queryFn: async () => {
-      const [accounts, sessions, {data}, passkeys] = await Promise.all([
+      const [accounts, sessions, {data}, passkeys, subscription] = await Promise.all([
         authClient.listAccounts(),
         authClient.listSessions(),
         authClient.getSession(),
-        authClient.passkey.listUserPasskeys()
+        authClient.passkey.listUserPasskeys(),
+        authClient.subscription.list()
       ]);
       const activeSessions = sessions?.data?.map((session) => ({
         ...session, 
@@ -40,7 +41,7 @@ export function useUserData() {
         type: getDeviceType(session),
         browser: getBrowserType(session)
       }))
-      return {accounts: accounts, sessions: activeSessions, user: data?.user, passkeys: passkeys.data}
+      return {accounts: accounts, sessions: activeSessions, user: data?.user, passkeys: passkeys.data, subscription: subscription.data}
     },
     staleTime: 60_000,
     gcTime: 5 * 60_000
@@ -51,6 +52,7 @@ export function useUserData() {
     sessions: query.data?.sessions ?? [],
     user: query.data?.user ?? null,
     passkeys: query.data?.passkeys ?? [],
+    subscription: query.data?.subscription,
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,

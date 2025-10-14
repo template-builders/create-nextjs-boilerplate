@@ -2,6 +2,8 @@ import { createAuthClient } from "better-auth/react"
 import {twoFactorClient, emailOTPClient,  } from "better-auth/client/plugins"
 import { passkeyClient } from "better-auth/client/plugins"
 import { stripeClient } from "@better-auth/stripe/client"
+import { redirect } from "next/navigation"
+import { toast } from "sonner"
 
 export const authClient = createAuthClient({
     // This will resolve to the below even if removed, but here for clarify
@@ -21,3 +23,12 @@ export const authClient = createAuthClient({
         })
     ]
 })
+
+export const protectPage = async () => {
+    const session = await authClient.getSession()
+    if (!session.data) {
+        toast.error("You are not logged in")
+        redirect("/")
+    }
+    console.log(session.data)
+}

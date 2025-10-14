@@ -7,6 +7,9 @@ import { db } from "@/db";
 import * as schema from "@/db/auth"
 import { verificationEmail, otpEmail, resetPassword } from "./resend/password";
 import { stripeClient, stripePlans } from "./stripe";
+import { redirect } from "next/navigation"
+import { headers } from "next/headers";
+
 export const auth = betterAuth({
     account: {
         accountLinking: {
@@ -39,6 +42,7 @@ export const auth = betterAuth({
         github: {
             clientId: process.env.GITHUB_CLIENT_ID!,
             clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+            redirectUri: "http://localhost:3000/api/auth/callback/github"
         },
         google: {
             clientId: process.env.GOOGLE_CLIENT_ID!,
