@@ -15,7 +15,6 @@ import * as dotenv from "dotenv"
         process.exit(1)
     }
 
-    
     const listener = await ngrok.forward({
         authtoken: AUTH_TOKEN,
         addr: 3000,

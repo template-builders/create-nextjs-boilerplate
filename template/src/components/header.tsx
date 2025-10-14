@@ -7,7 +7,6 @@ import { ModeToggle } from "./theme-provider"
 import { authClient } from "@/lib/auth-client"
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import {
@@ -21,7 +20,6 @@ import {
 
 export function Header() {
   const session = authClient.useSession()
-  const router = useRouter()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
@@ -33,10 +31,6 @@ export function Header() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
-
-  const handleHomeClick = () => {
-    router.push("/")
-  }
 
   return (
     <motion.header 
@@ -50,21 +44,22 @@ export function Header() {
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <motion.div 
-          className="flex items-center space-x-2 hover:cursor-pointer"
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 400, damping: 10 }}
-          onClick={handleHomeClick}
-        >
+        <Link href="/">
           <motion.div 
-            className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center"
-            whileHover={{ rotate: 5 }}
+            className="flex items-center space-x-2 hover:cursor-pointer"
+            whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
-            <FileText className="w-5 h-5 text-primary-foreground" />
+            <motion.div 
+              className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center"
+              whileHover={{ rotate: 5 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <FileText className="w-5 h-5 text-primary-foreground" />
+            </motion.div>
+            <span className="text-xl font-bold text-foreground">YourApp</span>
           </motion.div>
-          <span className="text-xl font-bold text-foreground">YourApp</span>
-        </motion.div>
+        </Link>
         
         <NavigationMenu className="hidden md:flex">
           <NavigationMenuList>
