@@ -1,3 +1,5 @@
+"use client"
+
 import { BaseSidebar } from "@/components/base-sidebar"
 import {
   Breadcrumb,

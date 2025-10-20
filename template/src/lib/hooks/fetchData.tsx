@@ -1,7 +1,8 @@
+"use client"
+
 import { authClient } from "@/lib/auth-client";
 import { useQuery } from "@tanstack/react-query";
 import { Session } from "better-auth";
-import {Subscription} from '@better-auth/stripe'
 
 type DeviceType = "Phone" | "Tablet" | "Desktop" | "Unknown";
 type BrowserType = "Chrome" | "Safari" | "Firefox" | "Edge" | "Opera" | "Brave" | "Unknown";

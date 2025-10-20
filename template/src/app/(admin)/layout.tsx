@@ -7,20 +7,21 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { user } from "@/db/schemas/auth"
 import { useUserData } from "@/lib/hooks/fetchData"
 import { Home, User, ChartNoAxesCombined, Logs } from "lucide-react"
 import { SidebarLinkProps } from "@/components/base-sidebar"
+import { useEffect } from "react"
 
 const items: SidebarLinkProps[] = [
   {link: "/admin", icon: Home, title: "Home"},
-  {link: "/admin/users", icon: User, title: "User" },
-  {link: "/admin/stats", icon: ChartNoAxesCombined, title: "Stats" },
-  {link: "/admin/logs", icon: Logs, title: "Logs" },
+  {link: "/admin/users", icon: User, title: "Users"},
+  {link: "/admin/stats", icon: ChartNoAxesCombined, title: "Stats"},
+  {link: "/admin/logs", icon: Logs, title: "Logs"},
 ]
 
 export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {
   const userData = useUserData()
+
   return (
     <SidebarProvider>
       <BaseSidebar user={userData} items={items}/>

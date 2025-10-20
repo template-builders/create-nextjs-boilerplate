@@ -11,17 +11,11 @@ import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { BillingDetails } from "./billingDetails"
-import { protectPage } from "@/lib/auth-client"
-import { useEffect } from "react"
 import { LoadingScreen } from "@/components"
 
 export default function ProfilePage() {
   const userData = useUserData()
   const router = useRouter()
-
-  useEffect(() => {
-    protectPage()
-  }, [])
 
   const logout = async () => {
     await authClient.signOut({

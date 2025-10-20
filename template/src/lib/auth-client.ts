@@ -1,5 +1,5 @@
 import { createAuthClient } from "better-auth/react"
-import {twoFactorClient, emailOTPClient,  } from "better-auth/client/plugins"
+import {twoFactorClient, emailOTPClient, adminClient} from "better-auth/client/plugins"
 import { passkeyClient } from "better-auth/client/plugins"
 import { stripeClient } from "@better-auth/stripe/client"
 import { redirect } from "next/navigation"
@@ -11,6 +11,7 @@ export const authClient = createAuthClient({
     basePath: "/api/auth",
     secret: process.env.BETTER_AUTH_SECRET,
     plugins: [
+        adminClient(),
         twoFactorClient({
             onTwoFactorRedirect() {
                 window.location.href = "/2FA"
