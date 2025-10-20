@@ -30,5 +30,4 @@ export const protectPage = async () => {
         toast.error("You are not logged in")
         redirect("/")
     }
-    console.log(session.data)
 }

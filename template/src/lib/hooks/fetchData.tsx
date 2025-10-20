@@ -1,6 +1,7 @@
 import { authClient } from "@/lib/auth-client";
 import { useQuery } from "@tanstack/react-query";
 import { Session } from "better-auth";
+import {Subscription} from '@better-auth/stripe'
 
 type DeviceType = "Phone" | "Tablet" | "Desktop" | "Unknown";
 type BrowserType = "Chrome" | "Safari" | "Firefox" | "Edge" | "Opera" | "Brave" | "Unknown";
@@ -41,7 +42,13 @@ export function useUserData() {
         type: getDeviceType(session),
         browser: getBrowserType(session)
       }))
-      return {accounts: accounts, sessions: activeSessions, user: data?.user, passkeys: passkeys.data, subscription: subscription.data}
+      return {
+        accounts: accounts, 
+        sessions: activeSessions, 
+        user: data?.user, 
+        passkeys: passkeys.data, 
+        subscription: subscription.data ? subscription.data[0] : null
+      }
     },
     staleTime: 60_000,
     gcTime: 5 * 60_000

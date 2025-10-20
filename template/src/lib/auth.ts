@@ -1,14 +1,14 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { emailOTP, twoFactor, phoneNumber } from "better-auth/plugins";
+import { emailOTP, twoFactor, phoneNumber, admin } from "better-auth/plugins";
 import { stripe } from "@better-auth/stripe"
 import { passkey } from "better-auth/plugins/passkey";
 import { db } from "@/db"; 
-import * as schema from "@/db/auth"
+import { subscription } from "@/db/schemas/auth"
+import { usage } from "@/db/schemas/plan"
+import {schemaTables} from "@/db/schemas"
 import { verificationEmail, otpEmail, resetPassword } from "./resend/password";
 import { stripeClient, stripePlans } from "./stripe";
-import { redirect } from "next/navigation"
-import { headers } from "next/headers";
 
 export const auth = betterAuth({
     account: {
@@ -19,7 +19,7 @@ export const auth = betterAuth({
     trustedOrigins: [`https://${process.env.NGROK_DOMAIN}`, `${process.env.BETTER_AUTH_URL}`],
     database: drizzleAdapter(db, {
         provider: "pg",
-        schema
+        schema: schemaTables
     }),
     emailAndPassword: {
         enabled: true,
@@ -54,6 +54,7 @@ export const auth = betterAuth({
         },
     },
     plugins: [
+        admin(),
         phoneNumber(),
         emailOTP({
             otpLength: 8,
@@ -74,6 +75,35 @@ export const auth = betterAuth({
             stripeClient,
             stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
             createCustomerOnSignUp: true,
+            async onCustomerCreate({user, stripeCustomer}, ctx) {
+                const start = new Date()
+                const end = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                function createSubscription() {
+                    return db.insert(subscription).values({
+                        id: crypto.randomUUID(),
+                        plan: "basic",
+                        referenceId: user.id,
+                        stripeCustomerId: user.stripeCustomerId,
+                        status: "active",
+                        periodStart: start,
+                        periodEnd: end,
+                    })
+                }
+                function createUsage(metric: string) {
+                    return db.insert(usage).values({
+                        referenceId: user.id,
+                        metric,
+                        periodStart: start,
+                        periodEnd: end,
+                        count: 0,
+                        updatedAt: start
+                    })
+                }
+                await Promise.all([
+                    createSubscription(),
+                    ...["projects", "analyses"].map((metric) => createUsage(metric)) 
+                ])
+            },
             subscription: {
                 enabled: true,
                 plans: stripePlans

@@ -1,5 +1,5 @@
 "use client"
-import { useUserData, UserData } from "./fetchData"
+import { useUserData, UserData } from "../../../lib/hooks/fetchData"
 import { MainDetails } from "./mainDetails"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"

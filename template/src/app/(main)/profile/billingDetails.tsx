@@ -18,7 +18,7 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
   
   useEffect(() => {
     if (data.subscription) {
-      setSubscription(data.subscription[0])
+      setSubscription(data.subscription)
     }
   }, [data.subscription])
 
@@ -57,11 +57,8 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
     }
   }
 
-  const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency.toUpperCase()
-    }).format(amount / 100)
+  const formatName = (plan: string) => {
+    return plan.slice(0, 1).toUpperCase() + plan.slice(1)
   }
 
   const formatDate = (date: Date) => {
@@ -95,7 +92,7 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold text-lg">{subscription.plan || 'Premium Plan'}</h3>
+                    <h3 className="font-semibold text-lg">{formatName(subscription.plan)} Plan</h3>
                     <p className="text-muted-foreground">
                       Plan ID: {subscription.referenceId}
                     </p>

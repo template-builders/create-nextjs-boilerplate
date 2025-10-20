@@ -72,6 +72,9 @@ export function Header() {
                   <ListItem href="/features" title="Features">
                     Discover our powerful features designed to help you succeed.
                   </ListItem>
+                  <ListItem href="/pricing" title="Pricing">
+                    Choose the perfect plan for your business needs.
+                  </ListItem>
                   <ListItem href="/docs" title="Docs">
                     Comprehensive documentation and guides.
                   </ListItem>
@@ -206,6 +209,15 @@ export function Header() {
                       transition={{ type: "spring", stiffness: 400, damping: 10 }}
                     >
                       Features
+                    </motion.a>
+                    <motion.a 
+                      href="/pricing" 
+                      className="block text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      whileHover={{ x: 10 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    >
+                      Pricing
                     </motion.a>
                     <motion.a 
                       href="/docs" 

@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { Header } from "@/components";
-import { Footer } from "@/components";
-import { ScrollProgress } from "@/components/scroll-progress";
+import "@/app/globals.css"
 import Providers from "./providers";
+import { ScrollProgress } from "@/components/scroll-progress";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +19,6 @@ export const metadata: Metadata = {
   description: "A modern, scalable platform that helps you build, manage, and grow your business with powerful tools and intuitive design.",
 }; 
 
-
 export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {
 
   return (
@@ -31,9 +28,7 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
       >
         <Providers>
           <ScrollProgress />
-          <Header />
-            {children}     
-          <Footer />    
+          {children}    
         </Providers>
       </body>
     </html>
