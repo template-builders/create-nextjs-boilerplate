@@ -21,8 +21,6 @@ export default async function middleware(request: NextRequest) {
         return NextResponse.redirect(redirectURL)
     }
 
-
-
     return NextResponse.next()
 }
 
