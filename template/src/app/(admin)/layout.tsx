@@ -13,11 +13,16 @@ import { SidebarLinkProps } from "@/components/base-sidebar"
 import { useEffect } from "react"
 import { ModeToggle } from "@/components/theme-provider"
 
-const items: SidebarLinkProps[] = [
-  {link: "/admin", icon: Home, title: "Home"},
-  {link: "/admin/users", icon: User, title: "Users"},
-  {link: "/admin/stats", icon: ChartNoAxesCombined, title: "Stats"},
-  {link: "/admin/logs", icon: Logs, title: "Logs"},
+const examples: SidebarLinkProps[] = [
+  {
+    title: "Main",
+    children: [
+      {link: "/admin", icon: Home, title: "Home"},
+      {link: "/admin/users", icon: User, title: "User" },
+      {link: "/admin/stats", icon: ChartNoAxesCombined, title: "Stats" },
+      {link: "/admin/logs", icon: Logs, title: "Logs" }
+    ] 
+  }
 ]
 
 export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {
@@ -25,7 +30,7 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
 
   return (
     <SidebarProvider>
-      <BaseSidebar user={userData} items={items}/>
+      <BaseSidebar user={userData} items={examples}/>
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4 flex-1">

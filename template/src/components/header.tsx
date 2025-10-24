@@ -64,28 +64,11 @@ export function Header() {
         <NavigationMenu className="hidden md:flex">
           <NavigationMenuList>
             <NavigationMenuItem>
-              <NavigationMenuTrigger className="bg-transparent hover:bg-accent/50">
-                Product
-              </NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                  <ListItem href="/features" title="Features">
-                    Discover our powerful features designed to help you succeed.
-                  </ListItem>
-                  <ListItem href="/pricing" title="Pricing">
-                    Choose the perfect plan for your business needs.
-                  </ListItem>
-                  <ListItem href="/docs" title="Docs">
-                    Comprehensive documentation and guides.
-                  </ListItem>
-                  <ListItem href="/faq" title="FAQ">
-                    Find answers to frequently asked questions.
-                  </ListItem>
-                  <ListItem href="/updates" title="Updates">
-                    Stay updated with our latest features and improvements.
-                  </ListItem>
-                </ul>
-              </NavigationMenuContent>
+              <NavigationMenuLink asChild>
+                <a href="/pricing" className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                  Pricing
+                </a>
+              </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuTrigger className="bg-transparent hover:bg-accent/50">
@@ -98,6 +81,9 @@ export function Header() {
                   </ListItem>
                   <ListItem href="/about" title="About Us">
                     Learn more about our mission and values.
+                  </ListItem>
+                  <ListItem href="/faq" title="FAQ">
+                    Find answers to frequently asked questions.
                   </ListItem>
                 </ul>
               </NavigationMenuContent>
@@ -199,54 +185,15 @@ export function Header() {
             <div className="container mx-auto px-4 py-4 space-y-4">
               <nav className="flex flex-col space-y-4">
                 <div className="space-y-2">
-                  <h4 className="font-semibold text-foreground">Product</h4>
-                  <div className="ml-4 space-y-2">
-                    <motion.a 
-                      href="/features" 
-                      className="block text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      whileHover={{ x: 10 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                    >
-                      Features
-                    </motion.a>
-                    <motion.a 
-                      href="/pricing" 
-                      className="block text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      whileHover={{ x: 10 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                    >
-                      Pricing
-                    </motion.a>
-                    <motion.a 
-                      href="/docs" 
-                      className="block text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      whileHover={{ x: 10 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                    >
-                      Docs
-                    </motion.a>
-                    <motion.a 
-                      href="/faq" 
-                      className="block text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      whileHover={{ x: 10 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                    >
-                      FAQ
-                    </motion.a>
-                    <motion.a 
-                      href="/updates" 
-                      className="block text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      whileHover={{ x: 10 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                    >
-                      Updates
-                    </motion.a>
-                  </div>
+                  <motion.a 
+                    href="/pricing" 
+                    className="block text-foreground hover:text-primary transition-colors font-semibold"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    whileHover={{ x: 10 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  >
+                    Pricing
+                  </motion.a>
                 </div>
                 
                 <div className="space-y-2">
@@ -269,6 +216,15 @@ export function Header() {
                       transition={{ type: "spring", stiffness: 400, damping: 10 }}
                     >
                       About Us
+                    </motion.a>
+                    <motion.a 
+                      href="/faq" 
+                      className="block text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      whileHover={{ x: 10 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    >
+                      FAQ
                     </motion.a>
                   </div>
                 </div>

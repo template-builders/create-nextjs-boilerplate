@@ -1,5 +1,7 @@
-import Stripe from "stripe";
 import { StripePlan } from "@better-auth/stripe"
+
+export type PlanProps = "basic" | "plus" | "pro"
+export type MetricProps = "analyses" | "projects" |"annotations"
 
 export const userLimits = {
   basic: {

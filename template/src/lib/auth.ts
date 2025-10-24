@@ -6,7 +6,7 @@ import { passkey } from "better-auth/plugins/passkey";
 import { db } from "@/db"; 
 import {schemaTables} from "@/db/schemas"
 import { verificationEmail, otpEmail, resetPassword } from "./resend/password";
-import { stripePlans } from "./stripe";
+import { MetricProps, stripePlans } from "./stripe";
 import Stripe from "stripe";
 import { subscription } from "@/db/schemas/auth";
 import { usage } from "@/db/schemas/plan";
@@ -101,34 +101,31 @@ export const auth = betterAuth({
                 })
                 const periodStart = new Date(subscriptionData.items.data[0].current_period_start * 1000);
                 const periodEnd   = new Date(subscriptionData.items.data[0].current_period_end   * 1000);
-                async function createSubscription() {
-
-                    return db.insert(subscription).values({
-                        id: crypto.randomUUID(),
-                        plan: "basic",
-                        referenceId: user.id,
-                        stripeCustomerId: stripeCustomer.id,
-                        stripeSubscriptionId: subscriptionData.id,
-                        status: "active",
-                        periodStart,
-                        periodEnd,
-                        cancelAtPeriodEnd: subscriptionData.cancel_at_period_end,
-                        seats: 1,
-                    })
-                }
+                const id = crypto.randomUUID()
+                await db.insert(subscription).values({
+                    id,
+                    plan: "basic",
+                    referenceId: user.id,
+                    stripeCustomerId: stripeCustomer.id,
+                    stripeSubscriptionId: subscriptionData.id,
+                    status: "active",
+                    periodStart,
+                    periodEnd,
+                    cancelAtPeriodEnd: subscriptionData.cancel_at_period_end,
+                    seats: 1,
+                })
                 async function createUsage(metric: string) {
                     return db.insert(usage).values({
                         referenceId: user.id,
+                        subscriptionId: id,
                         metric,
-                        periodStart,
-                        periodEnd,
                         count: 0,
                         updatedAt: new Date()
                     })
                 }
+                const metrics: MetricProps[] = ["projects", "analyses", "annotations"]
                 await Promise.all([
-                    createSubscription(),
-                    ...["projects", "analyses", "annotations"].map((metric) => createUsage(metric)) 
+                    ...metrics.map((metric) => createUsage(metric)) 
                 ])
             },
             subscription: {

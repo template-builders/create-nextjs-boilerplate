@@ -16,24 +16,20 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Home, User, LucideIcon, ChartNoAxesCombined, Logs} from "lucide-react"
+import { Home, LucideIcon} from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { NavUser } from "./nav-user"
 import { UserData } from "@/hooks/use-user-data"
 
 export interface SidebarLinkProps {
-  link: string
-  icon: LucideIcon
   title: string
+  children: {
+    link: string
+    icon: LucideIcon
+    title: string
+  }[]
 }
-
-const examples: SidebarLinkProps[] = [
-  {link: "/admin", icon: Home, title: "Home"},
-  {link: "/admin/users", icon: User, title: "User" },
-  {link: "/admin/stats", icon: ChartNoAxesCombined, title: "Stats" },
-  {link: "/admin/logs", icon: Logs, title: "Logs" },
-]
 
 type BaseSidebarProps = React.ComponentProps<typeof Sidebar> & {
   items?: SidebarLinkProps[]
@@ -58,40 +54,45 @@ export function BaseSidebar({user, items, ...props}: BaseSidebarProps) {
       <div className="border-b mb-10"/>
       <SidebarContent>
         <SidebarMenu >
-          <div className={`flex flex-col gap-2 w-full ${open ? "" : "items-center"}`}>
-            {items?.map((item) => {
-              const isActive = pathname === item.link
-              const Icon = item.icon
-              return (
-                <SidebarMenuItem key={item.title}>
-                  {open ? (
-                    <SidebarMenuButton asChild>
-                      <Link href={item.link} className={`flex gap-4 items-center ${pathname === item.link ? "bg-muted" : ""}`}>
-                        <item.icon size={20}/>
-                        <div className={`font-bold text-lg`}>{item.title}</div>
-                      </Link>
-                    </SidebarMenuButton>
-                  ) : (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          aria-current={isActive ? "page" : undefined}
-                          onClick={() => router.push(item.link)}
-                          className={`p-2 rounded ${isActive ? "bg-muted" : ""}`}
-                        >
-                          <Icon size={20} />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="right" align="center">
-                        {item.title}
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </SidebarMenuItem>
-              )
-          })}
-          </div>
+          {items?.map((item, idx) => (
+            <div key={`item-${idx}`}>
+              {open && <div className="text-muted-foreground font-bold pl-2">{item.title}</div>}
+              <div className={`flex flex-col gap-2 w-full ${open ? "" : "items-center"}`}>   
+                  {item.children?.map((child) => {
+                    const isActive = pathname === child.link
+                    const Icon = child.icon
+                    return (
+                      <SidebarMenuItem key={child.title}>
+                        {open ? (
+                          <SidebarMenuButton asChild>
+                            <Link href={child.link} className={`flex gap-4 items-center ${pathname === child.link ? "bg-muted" : ""}`}>
+                              <child.icon size={20}/>
+                              <div className={`font-bold text-base`}>{child.title}</div>
+                            </Link>
+                          </SidebarMenuButton>
+                        ) : (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                aria-current={isActive ? "page" : undefined}
+                                onClick={() => router.push(child.link)}
+                                className={`p-2 rounded ${isActive ? "bg-muted" : ""}`}
+                              >
+                                <Icon size={20} />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" align="center">
+                              {child.title}
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </SidebarMenuItem>
+                    )
+                })}
+              </div>
+            </div>
+          ))}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>

@@ -13,9 +13,14 @@ import { SidebarLinkProps } from "@/components/base-sidebar"
 import { ModeToggle } from "@/components/theme-provider"
 
 const items: SidebarLinkProps[] = [
-  {link: "/dashboard", icon: Home, title: "Dashboard"},
-  {link: "/dashboard/projects", icon: Folder, title: "Projects"},
-  {link: "/dashboard/annotations", icon: MessageCircle, title: "Annotations"},
+  {
+    title: "Main",
+    children: [
+      {link: "/dashboard", icon: Home, title: "Dashboard"},
+      {link: "/dashboard/projects", icon: Folder, title: "Projects"},
+      {link: "/dashboard/annotations", icon: MessageCircle, title: "Annotations"}
+    ]
+  }
 ]
 
 export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {

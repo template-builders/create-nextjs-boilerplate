@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   text,
@@ -5,6 +6,7 @@ import {
   boolean,
   integer,
 } from "drizzle-orm/pg-core";
+import { usage } from "./plan";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -98,6 +100,10 @@ export const subscription = pgTable("subscription", {
   cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
   seats: integer("seats"),
 });
+
+export const subscriptionUsageRelation = relations(usage, ({many}) => ({
+  usages: many(usage)
+}))
 
 export const passkey = pgTable("passkey", {
   id: text("id").primaryKey(),

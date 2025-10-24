@@ -11,7 +11,7 @@ export function Footer() {
       <footer className="bg-sidebar border-t border-sidebar-border py-12 px-4">
         <div className="container mx-auto">
           <motion.div 
-            className="grid md:grid-cols-4 gap-8"
+            className="grid md:grid-cols-3 gap-8"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -74,35 +74,6 @@ export function Footer() {
               whileHover={{ y: -5 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              <h4 className="font-semibold text-sidebar-foreground mb-4">Product</h4>
-              <ul className="space-y-2 text-sidebar-foreground/70">
-                <motion.li whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
-                  <a href="/features" className="hover:text-sidebar-foreground transition-colors">
-                    Features
-                  </a>
-                </motion.li>
-                <motion.li whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
-                  <a href="/docs" className="hover:text-sidebar-foreground transition-colors">
-                    Docs
-                  </a>
-                </motion.li>
-                <motion.li whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
-                  <a href="/faq" className="hover:text-sidebar-foreground transition-colors">
-                    FAQ
-                  </a>
-                </motion.li>
-                <motion.li whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
-                  <a href="/updates" className="hover:text-sidebar-foreground transition-colors">
-                    Updates
-                  </a>
-                </motion.li>
-              </ul>
-            </motion.div>
-
-            <motion.div
-              whileHover={{ y: -5 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
               <h4 className="font-semibold text-sidebar-foreground mb-4">Support</h4>
               <ul className="space-y-2 text-sidebar-foreground/70">
                 <motion.li whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
@@ -113,6 +84,11 @@ export function Footer() {
                 <motion.li whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
                   <a href="/about" className="hover:text-sidebar-foreground transition-colors">
                     About Us
+                  </a>
+                </motion.li>
+                <motion.li whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
+                  <a href="/faq" className="hover:text-sidebar-foreground transition-colors">
+                    FAQ
                   </a>
                 </motion.li>
               </ul>
