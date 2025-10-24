@@ -9,13 +9,16 @@ import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
-import { CreditCard, Calendar, Download, Settings, DollarSign, History, Shield, AlertCircle } from "lucide-react"
+import { Calendar, Download, Settings, DollarSign, Shield, AlertCircle } from "lucide-react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faStripeS } from "@fortawesome/free-brands-svg-icons"
-import { loadStripe, StripeElementsOptions } from "@stripe/stripe-js"
+import { useRouter } from "next/navigation"
+import { authClient } from "@/lib/auth-client"
+import { toast } from "sonner"
 
 export const BillingDetails = ({data}: TabsComponentProps) => {
   const [subscription, setSubscription] = useState<Subscription | null>(null)
+  const router = useRouter()
   
   useEffect(() => {
     if (data.subscription) {
@@ -60,6 +63,22 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
 
   const formatName = (plan: string) => {
     return plan.slice(0, 1).toUpperCase() + plan.slice(1)
+  }
+
+  const handleManageInformationClick = async () => {
+    const res = await authClient.subscription.billingPortal({
+      returnUrl: "/profile",
+      fetchOptions: {
+        onError: (ctx) => {
+          toast.error(ctx.error.message)
+        },
+        onSuccess: (ctx) => {
+          toast.info("Successfully created session")
+        }
+      }
+    })
+    if (!res.data) return
+    router.push(res.data.url)
   }
 
   const formatDate = (date: Date) => {
@@ -177,6 +196,7 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
             <Button 
               variant="outline" className="w-full hover:bg-accent/50 transition-all duration-200"
               disabled={subscription?.plan === "basic"}
+              onClick={handleManageInformationClick}
             >
               <FontAwesomeIcon icon={faStripeS} className="w-5 h-5 text-primary" />
               Manage Billing Information

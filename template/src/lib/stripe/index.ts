@@ -67,12 +67,15 @@ export const subscriptionFeatures = [
 export const stripePlans: StripePlan[] = [
   {
     name: "basic",
+    priceId: process.env.STRIPE_BASIC_ID,
     lookupKey: "basic_monthly",
     limits: userLimits.basic,
     group: "basic"
   },
   {
     name: "plus",
+    priceId: process.env.STRIPE_PLUS_MONTHLY_ID,
+    annualDiscountPriceId: process.env.STRIPE_PLUS_ANNUALLY_ID,
     lookupKey: "plus_monthly",
     annualDiscountLookupKey: "plus_annual",
     limits: userLimits.plus,
@@ -80,6 +83,8 @@ export const stripePlans: StripePlan[] = [
   },
   {
     name: "pro",
+    priceId: process.env.STRIPE_PRO_MONTHLY_ID,
+    annualDiscountPriceId: process.env.STRIPE_PRO_ANNUALLY_ID,
     lookupKey: "pro_monthly",
     annualDiscountLookupKey: "pro_annual",
     limits: userLimits.pro,

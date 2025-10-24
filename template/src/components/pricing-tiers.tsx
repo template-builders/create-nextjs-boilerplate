@@ -64,6 +64,14 @@ export function PricingTiersComponent({displayHeader = true}: {displayHeader?: b
         annual: isAnnual,
         successUrl: "/dashboard",
         cancelUrl: "/pricing",
+        fetchOptions: {
+          onError: (ctx) => {
+            toast.error(ctx.error.message)
+          },
+          onSuccess: (ctx) => {
+            toast.info("Successfully created checkout session")
+          }
+        }
       })
     }
   }

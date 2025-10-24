@@ -4,12 +4,12 @@ import { emailOTP, twoFactor, phoneNumber, admin } from "better-auth/plugins";
 import { stripe } from "@better-auth/stripe"
 import { passkey } from "better-auth/plugins/passkey";
 import { db } from "@/db"; 
-import { subscription } from "@/db/schemas/auth"
-import { usage } from "@/db/schemas/plan"
 import {schemaTables} from "@/db/schemas"
 import { verificationEmail, otpEmail, resetPassword } from "./resend/password";
 import { stripePlans } from "./stripe";
 import Stripe from "stripe";
+import { subscription } from "@/db/schemas/auth";
+import { usage } from "@/db/schemas/plan";
 
 export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2025-08-27.basil",
@@ -27,6 +27,19 @@ export const auth = betterAuth({
         provider: "pg",
         schema: schemaTables
     }),
+    advanced: {
+        database: {
+            generateId: () => crypto.randomUUID()
+        }
+    },
+    logger: {
+		disabled: false,
+		disableColors: false,
+		level: "error",
+		log: (level, message, ...args) => {
+			console.log(`[${level}] ${message}`, ...args);
+		}
+	},
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: true,
@@ -82,32 +95,40 @@ export const auth = betterAuth({
             stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
             createCustomerOnSignUp: true,
             async onCustomerCreate({user, stripeCustomer}, ctx) {
-                const start = new Date()
-                const end = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-                function createSubscription() {
+                const subscriptionData = await stripeClient.subscriptions.create({
+                    customer: stripeCustomer.id,
+                    items: [{price: process.env.STRIPE_BASIC_ID}]
+                })
+                const periodStart = new Date(subscriptionData.items.data[0].current_period_start * 1000);
+                const periodEnd   = new Date(subscriptionData.items.data[0].current_period_end   * 1000);
+                async function createSubscription() {
+
                     return db.insert(subscription).values({
                         id: crypto.randomUUID(),
                         plan: "basic",
                         referenceId: user.id,
-                        stripeCustomerId: user.stripeCustomerId,
+                        stripeCustomerId: stripeCustomer.id,
+                        stripeSubscriptionId: subscriptionData.id,
                         status: "active",
-                        periodStart: start,
-                        periodEnd: end,
+                        periodStart,
+                        periodEnd,
+                        cancelAtPeriodEnd: subscriptionData.cancel_at_period_end,
+                        seats: 1,
                     })
                 }
-                function createUsage(metric: string) {
+                async function createUsage(metric: string) {
                     return db.insert(usage).values({
                         referenceId: user.id,
                         metric,
-                        periodStart: start,
-                        periodEnd: end,
+                        periodStart,
+                        periodEnd,
                         count: 0,
-                        updatedAt: start
+                        updatedAt: new Date()
                     })
                 }
                 await Promise.all([
                     createSubscription(),
-                    ...["projects", "analyses"].map((metric) => createUsage(metric)) 
+                    ...["projects", "analyses", "annotations"].map((metric) => createUsage(metric)) 
                 ])
             },
             subscription: {
