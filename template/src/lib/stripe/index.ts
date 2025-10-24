@@ -1,39 +1,88 @@
 import Stripe from "stripe";
 import { StripePlan } from "@better-auth/stripe"
 
-export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-08-27.basil",
-  typescript: true
-});
-
-export const USER_LIMITS = {
+export const userLimits = {
   basic: {
     projects: 5, 
-    analyses: 5
+    analyses: 5,
+    annotations: 5
   },
   plus: {
     projects: 10, 
-    analyses: 50
+    analyses: 50,
+    annotations: 25,
   },
   pro: {
     projects: 25, 
-    analyses: 500
+    analyses: 500,
+    annotations: 250
   }
 }
 
+export const subscriptionFeatures = [
+  {
+    name: "Basic",
+    monthlyPrice: 0,
+    annualPrice: 0,
+    popular: false,
+    limitations: userLimits.basic,
+    buttonText: "Get started for Free",
+    description: "Perfect for individuals and small teams getting started",
+    features: [
+      `Up to ${userLimits.basic.projects} projects`,
+      `Up to ${userLimits.basic.analyses} analyses`,
+      `Up to ${userLimits.basic.annotations} annotations`
+    ]
+  },
+  {
+    name: "Plus",
+    monthlyPrice: 20,
+    annualPrice: parseFloat((192 / 12).toFixed(2)),
+    popular: true,
+    limitations: userLimits.plus,
+    buttonText: "Start Free Trial",
+    description: "Ideal for those who want an ideal developer experience",
+    features: [
+      `Up to ${userLimits.plus.projects} projects`,
+      `Up to ${userLimits.plus.analyses} analyses`,
+      `Up to ${userLimits.plus.annotations} annotations`
+    ]
+  },
+  {
+    name: "Pro",
+    monthlyPrice: 40,
+    annualPrice: parseFloat((384 / 12).toFixed(2)),
+    popular: false,
+    limitations: userLimits.pro,
+    buttonText: "Subscribe today",
+    description: "For those who use heavily analyses and extensive project reads",
+    features: [
+      `Up to ${userLimits.pro.projects} projects`,
+      `Up to ${userLimits.pro.analyses} analyses`,
+      `Up to ${userLimits.pro.annotations} annotations`
+    ]
+  }
+]
+
 export const stripePlans: StripePlan[] = [
+  {
+    name: "basic",
+    lookupKey: "basic_monthly",
+    limits: userLimits.basic,
+    group: "basic"
+  },
   {
     name: "plus",
     lookupKey: "plus_monthly",
     annualDiscountLookupKey: "plus_annual",
-    limits: USER_LIMITS.plus,
+    limits: userLimits.plus,
     group: "plus"
   },
   {
     name: "pro",
     lookupKey: "pro_monthly",
     annualDiscountLookupKey: "pro_annual",
-    limits: USER_LIMITS.pro,
+    limits: userLimits.pro,
     freeTrial: {
       days: 14
     }

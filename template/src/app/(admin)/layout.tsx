@@ -7,7 +7,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { useUserData } from "@/lib/hooks/fetchData"
+import { useUserData } from "@/hooks/use-user-data"
 import { Home, User, ChartNoAxesCombined, Logs } from "lucide-react"
 import { SidebarLinkProps } from "@/components/base-sidebar"
 import { useEffect } from "react"

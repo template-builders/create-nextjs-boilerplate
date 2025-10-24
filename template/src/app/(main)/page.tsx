@@ -53,7 +53,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
       <motion.section 
         ref={heroRef}
         className="py-20 px-4 relative overflow-hidden"
@@ -61,7 +60,6 @@ export default function LandingPage() {
         animate={heroInView ? "visible" : "hidden"}
         variants={containerVariants}
       >
-        {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
         
         <div className="container mx-auto text-center max-w-4xl relative">
@@ -105,7 +103,6 @@ export default function LandingPage() {
         </div>
       </motion.section>
 
-      {/* Features Section */}
       <motion.section 
         ref={featuresRef}
         id="features" 
@@ -219,7 +216,6 @@ export default function LandingPage() {
         </div>
       </motion.section>
 
-      {/* CTA Section */}
       <motion.section 
         ref={ctaRef}
         className="py-20 px-4 bg-primary/5 relative overflow-hidden"
@@ -227,7 +223,6 @@ export default function LandingPage() {
         animate={ctaInView ? "visible" : "hidden"}
         variants={containerVariants}
       >
-        {/* Background pattern */}
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
         
         <div className="container mx-auto text-center max-w-3xl relative">

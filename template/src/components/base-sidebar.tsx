@@ -20,7 +20,7 @@ import { Home, User, LucideIcon, ChartNoAxesCombined, Logs} from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { NavUser } from "./nav-user"
-import { UserData } from "@/lib/hooks/fetchData"
+import { UserData } from "@/hooks/use-user-data"
 
 export interface SidebarLinkProps {
   link: string

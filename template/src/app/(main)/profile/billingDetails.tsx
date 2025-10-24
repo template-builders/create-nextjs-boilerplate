@@ -12,6 +12,7 @@ import { motion } from "framer-motion"
 import { CreditCard, Calendar, Download, Settings, DollarSign, History, Shield, AlertCircle } from "lucide-react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faStripeS } from "@fortawesome/free-brands-svg-icons"
+import { loadStripe, StripeElementsOptions } from "@stripe/stripe-js"
 
 export const BillingDetails = ({data}: TabsComponentProps) => {
   const [subscription, setSubscription] = useState<Subscription | null>(null)
@@ -166,47 +167,25 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
         <Card className="hover:shadow-lg transition-all duration-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-primary" />
-              Payment Methods
+              <FontAwesomeIcon icon={faStripeS} className="w-5 h-5 text-primary" />
+              Payment Information
             </CardTitle>
             <CardDescription>Manage your saved payment methods and billing information</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Separator />
             
-            <motion.div 
-              className="flex items-center justify-between p-4 border rounded-lg border-border hover:bg-accent/5 transition-all duration-200"
-              whileHover={{ scale: 1.02 }}
+            <Button 
+              variant="outline" className="w-full hover:bg-accent/50 transition-all duration-200"
+              disabled={subscription?.plan === "basic"}
             >
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <CreditCard className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">•••• •••• •••• 4242</p>
-                  <p className="text-sm text-muted-foreground">Expires 12/25</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200">
-                  Remove
-                </Button>
-                <Button variant="outline" size="sm" className="hover:bg-accent/50 transition-all duration-200">
-                  Edit
-                </Button>
-              </div>
-            </motion.div>
-            
-            <Button variant="outline" className="w-full hover:bg-accent/50 transition-all duration-200">
-              <CreditCard className="w-4 h-4 mr-2" />
-              Add Payment Method
+              <FontAwesomeIcon icon={faStripeS} className="w-5 h-5 text-primary" />
+              Manage Billing Information
             </Button>
           </CardContent>
         </Card>
       </motion.div>
 
-      {/* Billing History */}
-      <motion.div variants={itemVariants}>
+      {/* <motion.div variants={itemVariants}>
         <Card className="hover:shadow-lg transition-all duration-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -253,7 +232,7 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
             </Button>
           </CardContent>
         </Card>
-      </motion.div>
+      </motion.div> */}
 
       <motion.div variants={itemVariants}>
         <Card className="hover:shadow-lg transition-all duration-300">

@@ -8,7 +8,13 @@ import { subscription } from "@/db/schemas/auth"
 import { usage } from "@/db/schemas/plan"
 import {schemaTables} from "@/db/schemas"
 import { verificationEmail, otpEmail, resetPassword } from "./resend/password";
-import { stripeClient, stripePlans } from "./stripe";
+import { stripePlans } from "./stripe";
+import Stripe from "stripe";
+
+export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2025-08-27.basil",
+    typescript: true
+  });
 
 export const auth = betterAuth({
     account: {
