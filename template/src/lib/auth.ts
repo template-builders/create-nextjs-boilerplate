@@ -1,4 +1,4 @@
-import { betterAuth } from "better-auth";
+import { APIError, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP, twoFactor, phoneNumber, admin } from "better-auth/plugins";
 import { stripe } from "@better-auth/stripe"
@@ -22,6 +22,18 @@ export const auth = betterAuth({
     account: {
         accountLinking: {
             enabled: true
+        }
+    },
+    user: {
+        deleteUser: {
+            enabled: true,
+            beforeDelete: async (user, request) => {
+                const subscriptionData = await db.query.subscription.findFirst({where: (subscription, {eq}) => eq(subscription.referenceId, user.id)})
+                if (!subscriptionData) throw new APIError("BAD_REQUEST", {message: "Failed to delete stripe data, please try again"})
+                
+                await stripeClient.customers.del(subscriptionData.stripeCustomerId as string)
+                console.log("Successfully deleted stripe data")
+            }
         }
     },
     trustedOrigins: [`https://${process.env.NGROK_DOMAIN}`, `${process.env.BETTER_AUTH_URL}`],
