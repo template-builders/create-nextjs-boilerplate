@@ -10,11 +10,13 @@ import { MetricProps, stripePlans } from "./stripe";
 import Stripe from "stripe";
 import { subscription } from "@/db/schemas/auth";
 import { usage } from "@/db/schemas/plan";
+import { stripeEventHandler } from "./stripe/event-handler";
 
 export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2025-08-27.basil",
     typescript: true
-  });
+});
+
 
 export const auth = betterAuth({
     account: {
@@ -128,9 +130,10 @@ export const auth = betterAuth({
                     ...metrics.map((metric) => createUsage(metric)) 
                 ])
             },
+            onEvent: stripeEventHandler,
             subscription: {
                 enabled: true,
-                plans: stripePlans
+                plans: stripePlans,
             }
         }),
         passkey()

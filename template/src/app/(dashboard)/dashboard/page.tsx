@@ -6,9 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 import { 
-  Activity, 
-  BarChart3, 
-  TrendingUp, 
+  Activity,
   Clock, 
   AlertCircle,
   CheckCircle,

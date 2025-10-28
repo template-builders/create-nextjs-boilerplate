@@ -1,13 +1,14 @@
 "use client"
 
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { Mail, Phone, MapPin, Clock, MessageSquare, Headphones, Users, Zap } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { useState } from "react"
 
 const contactMethods = [
   {
@@ -58,6 +59,24 @@ const supportTopics = [
   }
 ]
 
+const responseHighlights = [
+  {
+    icon: Clock,
+    value: "~2 hrs",
+    label: "Average reply time"
+  },
+  {
+    icon: Headphones,
+    value: "24/7",
+    label: "Global support coverage"
+  },
+  {
+    icon: MessageSquare,
+    value: "4.9/5",
+    label: "Customer satisfaction"
+  }
+]
+
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: "",
@@ -73,7 +92,9 @@ export default function ContactPage() {
     console.log("Form submitted:", formData)
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -81,104 +102,155 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-16">
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute -top-32 right-10 h-64 w-64 rounded-full bg-primary/30 opacity-40 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-purple-500/20 opacity-40 blur-3xl" />
+        <div className="absolute top-1/2 -left-24 h-72 w-72 rounded-full bg-blue-500/10 opacity-60 blur-3xl" />
+      </div>
+
+      <div className="container mx-auto px-4 py-20">
         <motion.div
-          className="text-center mb-16"
+          className="mx-auto mb-20 max-w-3xl text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <motion.div
-            className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6"
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
-          >
-            <Mail className="w-8 h-8 text-primary" />
-          </motion.div>
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-            Contact Us
+          <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/10 text-primary">
+            We&apos;re here around the clock
+          </Badge>
+          <h1 className="mb-6 text-4xl font-bold leading-tight text-foreground md:text-6xl">
+            Contact our team whenever you need us
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            We're here to help! Reach out to our support team for assistance, 
-            or get in touch for business inquiries and partnerships.
+          <p className="text-xl text-muted-foreground">
+            Whether you need technical help, want to explore enterprise solutions, or simply have a
+            question, our specialists are just a message away.
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-12 mb-16">
-          {/* Contact Methods */}
+        <motion.div
+          className="mb-16 grid gap-6 md:grid-cols-3"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+        >
+          {responseHighlights.map((item, index) => (
+            <motion.div
+              key={item.label}
+              className="relative overflow-hidden rounded-2xl border border-border/60 bg-background/60 p-6 backdrop-blur"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
+            >
+              <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                  <item.icon className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-3xl font-semibold text-foreground">{item.value}</p>
+                  <p className="text-sm text-muted-foreground">{item.label}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <div className="mb-20 grid gap-12 lg:grid-cols-[1.2fr_1fr]">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-2xl font-bold text-foreground mb-8">Get in Touch</h2>
-            <div className="space-y-6">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-semibold text-foreground">Choose how you&apos;d like to connect</h2>
+                <p className="mt-2 text-muted-foreground">
+                  Pick the channel that suits you best—we respond with the same urgency everywhere.
+                </p>
+              </div>
+              <div className="hidden lg:block">
+                <div className="rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm text-primary">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Seamless omnichannel support
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-5">
               {contactMethods.map((method, index) => (
                 <motion.div
-                  key={index}
+                  key={method.title}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
-                  <Card className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 bg-primary/10 rounded-lg">
-                          <method.icon className="w-6 h-6 text-primary" />
+                  <div className="group relative rounded-2xl border border-muted/50 bg-background/70 p-[1px] backdrop-blur transition hover:border-primary/60 hover:bg-primary/10">
+                    <div className="h-full w-full rounded-[1rem] bg-background/90 p-6">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex gap-4">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition group-hover:scale-105">
+                            <method.icon className="h-6 w-6" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-foreground">{method.title}</h3>
+                            <p className="text-sm text-muted-foreground">{method.description}</p>
+                          </div>
                         </div>
-                        <div>
-                          <CardTitle className="text-lg">{method.title}</CardTitle>
-                          <CardDescription>{method.description}</CardDescription>
+                        <div className="flex flex-col items-end gap-2 sm:text-right">
+                          <span className="text-sm text-muted-foreground">{method.contact}</span>
+                          <Button variant="ghost" className="group-hover:bg-primary/10">
+                            {method.action}
+                          </Button>
                         </div>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground mb-4">{method.contact}</p>
-                      <Button variant="outline" className="w-full">
-                        {method.action}
-                      </Button>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </motion.div>
               ))}
             </div>
           </motion.div>
 
-          {/* Contact Form */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.6 }}
           >
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">Send us a Message</CardTitle>
+            <Card className="border border-primary/20 bg-background/70 shadow-xl backdrop-blur">
+              <CardHeader className="space-y-3">
+                <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                  <span className="h-2 w-2 rounded-full bg-primary" />
+                  Typically responds in under 2 hours
+                </div>
+                <CardTitle className="text-2xl">Send us a message</CardTitle>
                 <CardDescription>
-                  Fill out the form below and we'll get back to you as soon as possible.
+                  Tell us what you need and we&apos;ll connect you with the right person.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                      <Label htmlFor="name">Name</Label>
+                      <Label htmlFor="name">Your name</Label>
                       <Input
                         id="name"
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
+                        placeholder="Jane Cooper"
                         required
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">Work email</Label>
                       <Input
                         id="email"
-                        name="email"
                         type="email"
+                        name="email"
                         value={formData.email}
                         onChange={handleInputChange}
+                        placeholder="you@example.com"
                         required
                       />
                     </div>
@@ -191,7 +263,7 @@ export default function ContactPage() {
                       name="topic"
                       value={formData.topic}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       required
                     >
                       <option value="">Select a topic</option>
@@ -209,6 +281,7 @@ export default function ContactPage() {
                       name="subject"
                       value={formData.subject}
                       onChange={handleInputChange}
+                      placeholder="How can we help?"
                       required
                     />
                   </div>
@@ -221,6 +294,7 @@ export default function ContactPage() {
                       value={formData.message}
                       onChange={handleInputChange}
                       rows={6}
+                      placeholder="Share as many details as possible..."
                       required
                     />
                   </div>
@@ -234,27 +308,29 @@ export default function ContactPage() {
           </motion.div>
         </div>
 
-        {/* Support Topics */}
         <motion.div
-          className="mb-16"
+          className="mb-20"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <h2 className="text-2xl font-bold text-foreground text-center mb-8">
-            What can we help you with?
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="mx-auto mb-10 max-w-2xl text-center">
+            <h2 className="text-3xl font-semibold text-foreground">What can we help you with?</h2>
+            <p className="mt-3 text-muted-foreground">
+              Our specialists cover every stage of your journey, from onboarding to long-term strategy.
+            </p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
             {supportTopics.map((topic, index) => (
               <motion.div
-                key={index}
+                key={topic.title}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
               >
-                <Card className="h-full hover:shadow-lg transition-shadow">
+                <Card className="h-full border border-transparent bg-background/70 shadow-sm transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl">
                   <CardHeader className="text-center">
-                    <div className="mx-auto p-3 bg-primary/10 rounded-lg w-fit mb-4">
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
                       <topic.icon className="w-6 h-6 text-primary" />
                     </div>
                     <CardTitle className="text-lg">{topic.title}</CardTitle>
@@ -266,41 +342,69 @@ export default function ContactPage() {
           </div>
         </motion.div>
 
-        {/* Office Information */}
         <motion.div
-          className="bg-muted/50 rounded-2xl p-8"
+          className="rounded-3xl border border-border/80 bg-background/60 p-10 text-center backdrop-blur"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
         >
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div>
-              <MapPin className="w-8 h-8 text-primary mx-auto mb-4" />
-              <h3 className="font-semibold text-foreground mb-2">Office Location</h3>
+          <div className="grid gap-8 md:grid-cols-3">
+            <div className="space-y-3">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
+                <MapPin className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="font-semibold text-foreground">Office Location</h3>
               <p className="text-muted-foreground">
                 123 Business Street<br />
                 San Francisco, CA 94105<br />
                 United States
               </p>
             </div>
-            <div>
-              <Clock className="w-8 h-8 text-primary mx-auto mb-4" />
-              <h3 className="font-semibold text-foreground mb-2">Business Hours</h3>
+            <div className="space-y-3">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
+                <Clock className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="font-semibold text-foreground">Business Hours</h3>
               <p className="text-muted-foreground">
                 Monday - Friday: 9:00 AM - 6:00 PM EST<br />
                 Saturday: 10:00 AM - 4:00 PM EST<br />
                 Sunday: Closed
               </p>
             </div>
-            <div>
-              <Phone className="w-8 h-8 text-primary mx-auto mb-4" />
-              <h3 className="font-semibold text-foreground mb-2">Emergency Support</h3>
+            <div className="space-y-3">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
+                <Phone className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="font-semibold text-foreground">Emergency Support</h3>
               <p className="text-muted-foreground">
                 24/7 Emergency Support<br />
                 Available for Enterprise customers<br />
                 +1 (555) 911-SUPPORT
               </p>
             </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          className="mt-16 rounded-3xl border border-primary/30 bg-primary/10 px-10 py-12 text-center backdrop-blur"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+        >
+          <p className="text-sm font-medium uppercase tracking-widest text-primary">
+            Prefer to talk instead?
+          </p>
+          <h3 className="mt-4 text-3xl font-semibold text-foreground">
+            Schedule a product walkthrough with our specialists.
+          </h3>
+          <p className="mt-3 text-muted-foreground">
+            Discover how YourApp integrates with your workflow in a 30-minute bespoke session.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Button size="lg">Book a call</Button>
+            <Button size="lg" variant="outline" className="border-primary/40 text-primary hover:bg-primary/10">
+              Explore our help center
+            </Button>
           </div>
         </motion.div>
       </div>

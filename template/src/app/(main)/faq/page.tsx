@@ -1,10 +1,14 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { HelpCircle, ChevronDown, ChevronUp } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { 
+  Accordion, 
+  AccordionContent, 
+  AccordionItem, 
+  AccordionTrigger 
+} from "@/components/ui/accordion"
 
 const faqData = [
   {
@@ -49,48 +53,6 @@ const faqData = [
   }
 ]
 
-function FAQItem({ question, answer, index }: { question: string; answer: string; index: number }) {
-  const [isOpen, setIsOpen] = useState(false)
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-    >
-      <Card className="mb-4">
-        <CardHeader 
-          className="cursor-pointer hover:bg-muted/50 transition-colors"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-left pr-4">{question}</CardTitle>
-            <motion.div
-              animate={{ rotate: isOpen ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              {isOpen ? (
-                <ChevronUp className="w-5 h-5 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-muted-foreground" />
-              )}
-            </motion.div>
-          </div>
-        </CardHeader>
-        <motion.div
-          initial={false}
-          animate={{ height: isOpen ? "auto" : 0 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="overflow-hidden"
-        >
-          <CardContent className="pt-0">
-            <p className="text-muted-foreground leading-relaxed">{answer}</p>
-          </CardContent>
-        </motion.div>
-      </Card>
-    </motion.div>
-  )
-}
 
 export default function FAQPage() {
   return (
@@ -118,16 +80,35 @@ export default function FAQPage() {
           </p>
         </motion.div>
 
-        <div className="max-w-4xl mx-auto">
-          {faqData.map((faq, index) => (
-            <FAQItem
-              key={index}
-              question={faq.question}
-              answer={faq.answer}
-              index={index}
-            />
-          ))}
-        </div>
+        <motion.div 
+          className="max-w-4xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <Accordion type="single" collapsible>
+            {faqData.map((faq, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+              >
+                <AccordionItem 
+                  value={`item-${index}`}
+                  className="border border-border rounded-lg px-6 bg-card"
+                >
+                  <AccordionTrigger className="text-left hover:no-underline py-6">
+                    <span className="text-lg font-semibold pr-4">{faq.question}</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-6">
+                    <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
+                  </AccordionContent>
+                </AccordionItem>
+              </motion.div>
+            ))}
+          </Accordion>
+        </motion.div>
 
         <motion.div
           className="bg-muted/50 rounded-2xl p-8 text-center mt-16"

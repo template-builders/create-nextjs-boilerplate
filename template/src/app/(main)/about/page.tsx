@@ -1,178 +1,234 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Users, Target, Award, Heart, Globe, Lightbulb, Shield, Zap } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import {
+  Users,
+  Target,
+  Award,
+  Heart,
+  Globe,
+  Lightbulb,
+  Shield,
+  Zap,
+  Rocket,
+  Sparkles,
+  Building2
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 const values = [
   {
     icon: Users,
     title: "User-Centric",
-    description: "We put our users at the center of everything we do, constantly listening to feedback and evolving our platform to meet their needs."
+    description:
+      "We put our users at the center of everything we do, constantly listening to feedback and evolving our platform to meet their needs."
   },
   {
     icon: Lightbulb,
     title: "Innovation",
-    description: "We embrace cutting-edge technology and creative solutions to solve complex problems and drive meaningful change."
+    description:
+      "We embrace cutting-edge technology and creative solutions to solve complex problems and drive meaningful change."
   },
   {
     icon: Shield,
     title: "Trust & Security",
-    description: "We maintain the highest standards of security and privacy, ensuring our users can trust us with their most important data."
+    description:
+      "We maintain the highest standards of security and privacy, ensuring our users can trust us with their most important data."
   },
   {
     icon: Heart,
     title: "Accessibility",
-    description: "We believe technology should be accessible to everyone, regardless of ability, background, or technical expertise."
-  }
-]
-
-const team = [
-  {
-    name: "Sarah Johnson",
-    role: "CEO & Co-Founder",
-    image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face",
-    description: "Former product manager at Google with 10+ years of experience building user-centric platforms."
-  },
-  {
-    name: "Michael Chen",
-    role: "CTO & Co-Founder",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
-    description: "Ex-Microsoft engineer passionate about scalable architecture and developer experience."
-  },
-  {
-    name: "Emily Rodriguez",
-    role: "Head of Design",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
-    description: "Award-winning designer with expertise in creating intuitive and beautiful user experiences."
-  },
-  {
-    name: "David Kim",
-    role: "Head of Engineering",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
-    description: "Full-stack engineer with a passion for building robust, scalable systems that just work."
+    description:
+      "We believe technology should be accessible to everyone, regardless of ability, background, or technical expertise."
   }
 ]
 
 const stats = [
-  { number: "50K+", label: "Active Users" },
-  { number: "99.9%", label: "Uptime" },
-  { number: "150+", label: "Countries" },
-  { number: "24/7", label: "Support" }
+  { number: "50K+", label: "Active Users", description: "Teams building on YourApp" },
+  { number: "99.9%", label: "Uptime", description: "Reliability across every region" },
+  { number: "150+", label: "Countries", description: "Global reach on five continents" },
+  { number: "24/7", label: "Support", description: "Support specialists worldwide" }
+]
+
+const timeline = [
+  {
+    year: "2020",
+    title: "YourApp is born",
+    description:
+      "We launched with a vision to make advanced tooling accessible to teams of any size. Our founding crew of builders left Big Tech to start fresh.",
+    icon: Rocket
+  },
+  {
+    year: "2021",
+    title: "Scaling globally",
+    description:
+      "Expanded our platform to over 60 countries and introduced real-time collaboration features requested by our growing community.",
+    icon: Globe
+  },
+  {
+    year: "2022",
+    title: "Enterprise ready",
+    description:
+      "Rolled out enterprise-grade security, compliance certifications, and white-glove onboarding for the world’s largest brands.",
+    icon: Shield
+  },
+  {
+    year: "2023",
+    title: "Community-first innovation",
+    description:
+      "Launched our open design system, community advocates program, and marketplace powered by builders around the world.",
+    icon: Sparkles
+  }
+]
+
+const cultureHighlights = [
+  {
+    icon: Target,
+    title: "Mission-Driven",
+    description:
+      "Every roadmap decision traces back to the customer outcomes we want to unlock. We win when our users do."
+  },
+  {
+    icon: Award,
+    title: "Design Excellence",
+    description:
+      "We obsess over craftsmanship—from micro-interactions to system architecture—so every touchpoint feels delightful."
+  },
+  {
+    icon: Building2,
+    title: "Inclusive Growth",
+    description:
+      "We invest in diverse, distributed teams because innovation thrives when different perspectives collide."
+  }
 ]
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-16">
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute -top-24 right-12 h-72 w-72 rounded-full bg-primary/25 opacity-50 blur-3xl" />
+        <div className="absolute left-0 top-1/4 h-[22rem] w-[22rem] rounded-full bg-purple-500/20 opacity-50 blur-3xl" />
+        <div className="absolute bottom-0 right-1/3 h-96 w-96 rounded-full bg-blue-500/10 opacity-60 blur-3xl" />
+      </div>
+
+      <div className="container mx-auto px-4 py-20">
         <motion.div
-          className="text-center mb-16"
+          className="mx-auto mb-20 max-w-4xl text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <motion.div
-            className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6"
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
-          >
-            <Users className="w-8 h-8 text-primary" />
-          </motion.div>
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-            About Us
+          <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/10 text-primary">
+            Purpose-built for ambitious teams
+          </Badge>
+          <h1 className="mb-6 text-4xl font-bold leading-tight text-foreground md:text-6xl">
+            Building the next generation of human-centered tools
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            We're a team of passionate innovators dedicated to building tools that empower 
-            businesses and individuals to achieve their goals through technology.
+          <p className="text-xl text-muted-foreground">
+            We&apos;re a community of engineers, designers, and strategists dedicated to shaping software that
+            amplifies the work of millions. Our north star is simple: create technology that feels invisible yet makes
+            a remarkable impact.
           </p>
-        </motion.div>
-
-        {/* Mission Section */}
-        <motion.div
-          className="text-center mb-20"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-foreground mb-6">Our Mission</h2>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-              To democratize access to powerful business tools and make advanced technology 
-              accessible to everyone, regardless of their technical background or company size. 
-              We believe that great ideas shouldn't be limited by complex software or high costs.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Badge variant="secondary" className="px-4 py-2">
-                <Target className="w-4 h-4 mr-2" />
-                Mission-Driven
-              </Badge>
-              <Badge variant="secondary" className="px-4 py-2">
-                <Globe className="w-4 h-4 mr-2" />
-                Global Impact
-              </Badge>
-              <Badge variant="secondary" className="px-4 py-2">
-                <Zap className="w-4 h-4 mr-2" />
-                Innovation First
-              </Badge>
-            </div>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <Button size="lg">Our impact report</Button>
+            <Button size="lg" variant="outline" className="border-primary/40 text-primary hover:bg-primary/10">
+              View open roles
+            </Button>
           </div>
         </motion.div>
 
-        {/* Stats Section */}
         <motion.div
-          className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20"
+          className="mb-20 grid gap-6 md:grid-cols-2 lg:grid-cols-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
         >
           {stats.map((stat, index) => (
             <motion.div
-              key={index}
-              className="text-center"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              key={stat.label}
+              className="rounded-2xl border border-border/60 bg-background/70 p-6 backdrop-blur"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
             >
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-                {stat.number}
-              </div>
-              <div className="text-muted-foreground">
+              <p className="text-3xl font-semibold text-foreground">{stat.number}</p>
+              <p className="mt-2 text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 {stat.label}
-              </div>
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground">{stat.description}</p>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Values Section */}
+        <motion.div
+          className="mb-20 rounded-3xl border border-primary/20 bg-primary/10 p-10 text-center backdrop-blur md:text-left"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.25 }}
+        >
+          <div className="grid gap-10 md:grid-cols-[1.6fr_1fr] md:items-center">
+            <div>
+              <h2 className="text-3xl font-semibold text-foreground">Our mission</h2>
+              <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+                To democratize access to powerful business tools and make advanced technology accessible to everyone,
+                regardless of their technical background or company size. We believe that great ideas shouldn&apos;t be
+                limited by complex software or high costs—and we&apos;re relentless about removing those barriers.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Badge variant="secondary" className="border border-primary/20 bg-background/80 text-primary">
+                  <Target className="mr-2 h-4 w-4" />
+                  Mission Driven
+                </Badge>
+                <Badge variant="secondary" className="border border-primary/20 bg-background/80 text-primary">
+                  <Globe className="mr-2 h-4 w-4" />
+                  Global Impact
+                </Badge>
+                <Badge variant="secondary" className="border border-primary/20 bg-background/80 text-primary">
+                  <Zap className="mr-2 h-4 w-4" />
+                  Innovation First
+                </Badge>
+              </div>
+            </div>
+            <Card className="border border-transparent bg-background/80 shadow-md backdrop-blur">
+              <CardHeader>
+                <CardTitle className="text-lg">How we ship</CardTitle>
+                <CardDescription>
+                  Cross-functional squads prototype weekly, validate with real users, and launch incrementally so every
+                  release is rooted in lived customer problems.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </motion.div>
+
         <motion.div
           className="mb-20"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
+          transition={{ duration: 0.6, delay: 0.35 }}
         >
-          <h2 className="text-3xl font-bold text-foreground text-center mb-12">Our Values</h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <h2 className="mb-10 text-center text-3xl font-semibold text-foreground">Our values</h2>
+          <div className="grid gap-8 md:grid-cols-2">
             {values.map((value, index) => (
               <motion.div
-                key={index}
+                key={value.title}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
               >
-                <Card className="h-full hover:shadow-lg transition-shadow">
+                <Card className="h-full border border-transparent bg-background/70 shadow-sm transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl">
                   <CardHeader>
                     <div className="flex items-center gap-4">
-                      <div className="p-3 bg-primary/10 rounded-lg">
-                        <value.icon className="w-6 h-6 text-primary" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                        <value.icon className="h-6 w-6 text-primary" />
                       </div>
                       <CardTitle className="text-xl">{value.title}</CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <CardDescription className="text-base leading-relaxed">
-                      {value.description}
-                    </CardDescription>
+                    <CardDescription className="text-base leading-relaxed">{value.description}</CardDescription>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -180,76 +236,95 @@ export default function AboutPage() {
           </div>
         </motion.div>
 
-        {/* Team Section */}
         <motion.div
           className="mb-20"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
+          transition={{ duration: 0.6, delay: 0.45 }}
         >
-          <h2 className="text-3xl font-bold text-foreground text-center mb-12">Meet Our Team</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {team.map((member, index) => (
+          <h2 className="mb-10 text-center text-3xl font-semibold text-foreground">Our journey</h2>
+          <div className="relative mx-auto max-w-3xl space-y-8">
+            <div className="absolute inset-y-0 left-6 w-px bg-gradient-to-b from-primary/60 via-primary/20 to-transparent md:left-8" />
+            {timeline.map((item, index) => (
               <motion.div
-                key={index}
+                key={item.year}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.6 + index * 0.1 }}
+                transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
               >
-                <Card className="h-full hover:shadow-lg transition-shadow">
-                  <CardHeader className="text-center">
-                    <div className="mx-auto mb-4">
-                      <img
-                        src={member.image}
-                        alt={member.name}
-                        className="w-24 h-24 rounded-full object-cover mx-auto"
-                      />
-                    </div>
-                    <CardTitle className="text-lg">{member.name}</CardTitle>
-                    <CardDescription className="font-medium text-primary">
-                      {member.role}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-center">
-                      {member.description}
-                    </CardDescription>
-                  </CardContent>
-                </Card>
+                <div className="relative rounded-2xl border border-border/60 bg-background/70 p-6 pl-16 backdrop-blur md:pl-20">
+                  <div className="absolute left-6 top-6 flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full border border-primary/30 bg-background/90 backdrop-blur md:left-8">
+                    <item.icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <p className="text-sm font-medium uppercase tracking-[0.3em] text-muted-foreground">{item.year}</p>
+                  <h3 className="mt-3 text-xl font-semibold text-foreground">{item.title}</h3>
+                  <p className="mt-4 text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+                </div>
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        {/* Story Section */}
         <motion.div
-          className="bg-muted/50 rounded-2xl p-8 md:p-12"
+          className="mb-20 grid gap-10 rounded-3xl border border-border/80 bg-background/70 p-10 backdrop-blur md:grid-cols-[1.6fr_1fr]"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.7 }}
+          transition={{ duration: 0.6, delay: 0.65 }}
         >
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-foreground mb-6">Our Story</h2>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-              Founded in 2020 by a team of former tech industry veterans, YourApp was born 
-              out of frustration with the complexity and cost of existing business tools. 
-              We saw too many great ideas fail not because they weren't good, but because 
-              the tools to bring them to life were either too expensive or too complicated.
+          <div>
+            <h2 className="text-3xl font-semibold text-foreground">Our story</h2>
+            <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+              Founded in 2020 by a team of former tech industry veterans, YourApp was born out of frustration with the
+              complexity and cost of existing business tools. We saw too many great ideas fail not because they weren&apos;t
+              good, but because the tools to bring them to life were either too expensive or too complicated.
             </p>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-              Today, we're proud to serve over 50,000 users worldwide, from solo entrepreneurs 
-              to Fortune 500 companies. Our platform has processed millions of transactions, 
-              helped launch thousands of businesses, and continues to evolve based on the 
-              feedback and needs of our amazing community.
+            <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
+              Today, we&apos;re proud to serve over 50,000 users worldwide, from solo entrepreneurs to Fortune 500
+              companies. Our platform has processed millions of transactions, helped launch thousands of businesses, and
+              continues to evolve based on the feedback and needs of our amazing community.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button>
-                Join Our Team
-              </Button>
-              <Button variant="outline">
-                Read Our Blog
-              </Button>
+            <div className="mt-8 flex flex-wrap gap-3">
+              {cultureHighlights.map((highlight) => (
+                <div
+                  key={highlight.title}
+                  className="flex items-center gap-3 rounded-2xl border border-muted/40 bg-background/80 px-4 py-3"
+                >
+                  <highlight.icon className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium text-foreground">{highlight.title}</span>
+                </div>
+              ))}
             </div>
+          </div>
+          <Card className="border border-transparent bg-primary/10 shadow-md backdrop-blur">
+            <CardHeader>
+              <CardTitle className="text-xl text-primary">Community snapshots</CardTitle>
+              <CardDescription className="text-base text-primary/80">
+                • 3,800+ community-led events<br />
+                • 400 ecosystem partners<br />
+                • 95% of features influenced by customer feedback
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          className="rounded-3xl border border-primary/30 bg-primary/10 px-10 py-12 text-center backdrop-blur"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.75 }}
+        >
+          <p className="text-sm font-medium uppercase tracking-widest text-primary">Join the movement</p>
+          <h3 className="mt-4 text-3xl font-semibold text-foreground">
+            Help us build tools that empower the next wave of innovators.
+          </h3>
+          <p className="mt-3 text-muted-foreground">
+            Explore how YourApp can accelerate your roadmap—or bring your superpowers to our team.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Button size="lg">Talk to us</Button>
+            <Button size="lg" variant="outline" className="border-primary/40 text-primary hover:bg-primary/10">
+              Explore careers
+            </Button>
           </div>
         </motion.div>
       </div>
