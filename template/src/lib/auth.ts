@@ -6,17 +6,18 @@ import { passkey } from "better-auth/plugins/passkey";
 import { db } from "@/db"; 
 import {schemaTables} from "@/db/schemas"
 import { verificationEmail, otpEmail, resetPassword } from "./resend/password";
-import { MetricProps, stripePlans } from "./stripe";
+import { usageMetrics, stripePlans } from "./stripe";
 import Stripe from "stripe";
 import { subscription } from "@/db/schemas/auth";
 import { usage } from "@/db/schemas/plan";
 import { stripeEventHandler } from "./stripe/event-handler";
+import { sendChangeEmail } from "./resend/change-email";
+import { addMonthsUTC, nowUTC } from "./cron/date";
 
 export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2025-08-27.basil",
     typescript: true
 });
-
 
 export const auth = betterAuth({
     account: {
@@ -33,6 +34,12 @@ export const auth = betterAuth({
                 
                 await stripeClient.customers.del(subscriptionData.stripeCustomerId as string)
                 console.log("Successfully deleted stripe data")
+            }
+        },
+        changeEmail: {
+            enabled: true,
+            sendChangeEmailVerification: async (data, request) => {
+                await sendChangeEmail(data.newEmail, data.url)
             }
         }
     },
@@ -74,16 +81,15 @@ export const auth = betterAuth({
     socialProviders: {
         github: {
             clientId: process.env.GITHUB_CLIENT_ID!,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-            redirectUri: "http://localhost:3000/api/auth/callback/github"
+            clientSecret: process.env.GITHUB_CLIENT_SECRET!
         },
         google: {
             clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!
         },
         discord: {
             clientId: process.env.DISCORD_CLIENT_ID!,
-            clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+            clientSecret: process.env.DISCORD_CLIENT_SECRET!
         },
     },
     plugins: [
@@ -100,7 +106,7 @@ export const auth = betterAuth({
             otpOptions: {
                 digits: 8,
                 async sendOTP ({user, otp}, request) {
-                    const data = await otpEmail(user.email, otp)
+                    await otpEmail(user.email, otp)
                 },
             }
         }),
@@ -109,23 +115,17 @@ export const auth = betterAuth({
             stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
             createCustomerOnSignUp: true,
             async onCustomerCreate({user, stripeCustomer}, ctx) {
-                const subscriptionData = await stripeClient.subscriptions.create({
-                    customer: stripeCustomer.id,
-                    items: [{price: process.env.STRIPE_BASIC_ID}]
-                })
-                const periodStart = new Date(subscriptionData.items.data[0].current_period_start * 1000);
-                const periodEnd   = new Date(subscriptionData.items.data[0].current_period_end   * 1000);
+                const periodStart = nowUTC()
+                const periodEnd = addMonthsUTC(periodStart, 1)
                 const id = crypto.randomUUID()
                 await db.insert(subscription).values({
                     id,
                     plan: "basic",
                     referenceId: user.id,
                     stripeCustomerId: stripeCustomer.id,
-                    stripeSubscriptionId: subscriptionData.id,
                     status: "active",
                     periodStart,
                     periodEnd,
-                    cancelAtPeriodEnd: subscriptionData.cancel_at_period_end,
                     seats: 1,
                 })
                 async function createUsage(metric: string) {
@@ -137,9 +137,8 @@ export const auth = betterAuth({
                         updatedAt: new Date()
                     })
                 }
-                const metrics: MetricProps[] = ["projects", "analyses", "annotations"]
                 await Promise.all([
-                    ...metrics.map((metric) => createUsage(metric)) 
+                    ...usageMetrics.map((metric) => createUsage(metric)) 
                 ])
             },
             onEvent: stripeEventHandler,

@@ -17,6 +17,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faDiscord, faGithub, faGoogle } from "@fortawesome/free-brands-svg-icons"
 import { PasskeyForm } from "./forms/passkeyForm"
+import { UpdateInformationForm } from "./forms/updateInfoForm"
 import { authClient } from "@/lib/auth-client"
 import { TabsComponentProps } from "./page"
 import { PasswordForm } from "./forms/passwordForm"
@@ -170,42 +171,7 @@ export const MainDetails = ({data}: TabsComponentProps) => {
           </CardHeader>
           <CardContent className="space-y-6">
             <Separator />
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <motion.div 
-                className="space-y-2"
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" placeholder="John" className="transition-all duration-200 focus:ring-2 focus:ring-primary/20" />
-              </motion.div>
-              <motion.div 
-                className="space-y-2"
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" placeholder="Doe" className="transition-all duration-200 focus:ring-2 focus:ring-primary/20" />
-              </motion.div>
-            </div>
-
-            <motion.div 
-              className="space-y-2"
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="john.doe@example.com" className="transition-all duration-200 focus:ring-2 focus:ring-primary/20" />
-            </motion.div>
-            
-            <div className="flex justify-between gap-4">
-              <PasswordForm data={data}/>
-              <div className="flex gap-4">
-                <Button variant="outline" className="hover:bg-accent/50 transition-all duration-200">Cancel</Button>
-                <Button className="hover:bg-primary/90 transition-all duration-200">Save Changes</Button>
-              </div>
-            </div>
+            <UpdateInformationForm data={data} />
           </CardContent>
         </Card>
       </motion.div>

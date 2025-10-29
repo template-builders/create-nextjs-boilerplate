@@ -8,7 +8,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { useUserData } from "@/hooks/use-user-data"
-import { Folder, Home, MessageCircle } from "lucide-react"
+import { Box, Home, Database, Cloud } from "lucide-react"
 import { SidebarLinkProps } from "@/components/base-sidebar"
 import { ModeToggle } from "@/components/theme-provider"
 
@@ -17,8 +17,9 @@ const items: SidebarLinkProps[] = [
     title: "Main",
     children: [
       {link: "/dashboard", icon: Home, title: "Dashboard"},
-      {link: "/dashboard/projects", icon: Folder, title: "Projects"},
-      {link: "/dashboard/annotations", icon: MessageCircle, title: "Annotations"}
+      {link: "/dashboard/storage", icon: Box, title: "Storages"},
+      {link: "/dashboard/database", icon: Database, title: "Databases"},
+      {link: "/dashboard/application", icon: Cloud, title: "Applications"}
     ]
   }
 ]

@@ -1,7 +1,6 @@
 import { db } from "@/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { subscription } from "@/db/schemas/auth";
 import { NextResponse } from "next/server";
 
 export async function GET() {

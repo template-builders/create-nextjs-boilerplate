@@ -6,6 +6,23 @@ import { Session } from "better-auth";
 
 type DeviceType = "Phone" | "Tablet" | "Desktop" | "Unknown";
 type BrowserType = "Chrome" | "Safari" | "Firefox" | "Edge" | "Opera" | "Brave" | "Unknown";
+type SubscriptionType = {
+  limits: Record<string, number> | undefined;
+  priceId: string | undefined;
+  id: string;
+  plan: string;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  trialStart?: Date;
+  trialEnd?: Date;
+  referenceId: string;
+  status: "active" | "canceled" | "incomplete" | "incomplete_expired" | "past_due" | "paused" | "trialing" | "unpaid";
+  periodStart?: Date;
+  periodEnd?: Date;
+  cancelAtPeriodEnd?: boolean;
+  groupId?: string;
+  seats?: number;
+}[]
 
 export function useUserData() {
   function getDeviceType(session: Session): DeviceType {
@@ -30,13 +47,14 @@ export function useUserData() {
   const query = useQuery({
     queryKey: ["user-data"],
     queryFn: async () => {
-      const [accounts, sessions, {data}, passkeys, subscription] = await Promise.all([
+      const [accounts, sessions, {data}, passkeys, subscriptionRes] = await Promise.all([
         authClient.listAccounts(),
         authClient.listSessions(),
         authClient.getSession(),
         authClient.passkey.listUserPasskeys(),
-        authClient.subscription.list()
+        fetch("/api/subscription")
       ]);
+      const subscription: SubscriptionType = await subscriptionRes.json()
       const activeSessions = sessions?.data?.map((session) => ({
         ...session, 
         current: session.id === data?.session.id,
@@ -48,7 +66,7 @@ export function useUserData() {
         sessions: activeSessions, 
         user: data?.user, 
         passkeys: passkeys.data, 
-        subscription: subscription.data ? subscription.data[0] : null
+        subscription: subscription ? subscription[0] : null
       }
     },
     staleTime: 60_000,

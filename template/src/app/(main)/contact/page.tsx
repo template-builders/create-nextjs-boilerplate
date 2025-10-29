@@ -9,13 +9,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const contactMethods = [
   {
     icon: Mail,
     title: "Email Support",
     description: "Get help via email within 24 hours",
-    contact: "support@yourapp.com",
+    contact: "support@example.com",
     action: "Send Email"
   },
   {
@@ -36,7 +37,7 @@ const contactMethods = [
     icon: Headphones,
     title: "Enterprise Support",
     description: "Dedicated support for enterprise customers",
-    contact: "enterprise@yourapp.com",
+    contact: "enterprise@example.com",
     action: "Contact Sales"
   }
 ]
@@ -68,11 +69,11 @@ const responseHighlights = [
   {
     icon: Headphones,
     value: "24/7",
-    label: "Global support coverage"
+    label: "Support coverage"
   },
   {
     icon: MessageSquare,
-    value: "4.9/5",
+    value: "4.8/5",
     label: "Customer satisfaction"
   }
 ]
@@ -117,14 +118,14 @@ export default function ContactPage() {
           transition={{ duration: 0.6 }}
         >
           <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/10 text-primary">
-            We&apos;re here around the clock
+            We&apos;re here to help
           </Badge>
           <h1 className="mb-6 text-4xl font-bold leading-tight text-foreground md:text-6xl">
-            Contact our team whenever you need us
+            Get in touch with our team
           </h1>
           <p className="text-xl text-muted-foreground">
-            Whether you need technical help, want to explore enterprise solutions, or simply have a
-            question, our specialists are just a message away.
+            Whether you need technical help, have questions about our platform, or want to explore 
+            enterprise solutions, we&apos;re here to help.
           </p>
         </motion.div>
 
@@ -173,7 +174,7 @@ export default function ContactPage() {
                 <div className="rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm text-primary">
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
-                    Seamless omnichannel support
+                    Multiple support channels
                   </div>
                 </div>
               </div>
@@ -256,22 +257,22 @@ export default function ContactPage() {
                     </div>
                   </div>
 
-                  <div>
+                  <div className="flex flex-col gap-4">
                     <Label htmlFor="topic">Topic</Label>
-                    <select
-                      id="topic"
-                      name="topic"
+                    <Select
                       value={formData.topic}
-                      onChange={handleInputChange}
-                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      required
+                      onValueChange={(value) => setFormData({ ...formData, topic: value })}
                     >
-                      <option value="">Select a topic</option>
-                      <option value="account">Account & Billing</option>
-                      <option value="technical">Technical Support</option>
-                      <option value="general">General Inquiry</option>
-                      <option value="partnership">Partnership</option>
-                    </select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a topic" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="account">Account & Billing</SelectItem>
+                        <SelectItem value="technical">Technical Support</SelectItem>
+                        <SelectItem value="general">General Inquiry</SelectItem>
+                        <SelectItem value="partnership">Partnership</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div>
@@ -317,7 +318,7 @@ export default function ContactPage() {
           <div className="mx-auto mb-10 max-w-2xl text-center">
             <h2 className="text-3xl font-semibold text-foreground">What can we help you with?</h2>
             <p className="mt-3 text-muted-foreground">
-              Our specialists cover every stage of your journey, from onboarding to long-term strategy.
+              Our team covers every aspect of our platform, from technical support to business inquiries.
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
@@ -385,28 +386,28 @@ export default function ContactPage() {
           </div>
         </motion.div>
 
-        <motion.div
+        {/* <motion.div
           className="mt-16 rounded-3xl border border-primary/30 bg-primary/10 px-10 py-12 text-center backdrop-blur"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.7 }}
         >
           <p className="text-sm font-medium uppercase tracking-widest text-primary">
-            Prefer to talk instead?
+            Prefer to talk?
           </p>
           <h3 className="mt-4 text-3xl font-semibold text-foreground">
-            Schedule a product walkthrough with our specialists.
+            Schedule a demo with our team.
           </h3>
           <p className="mt-3 text-muted-foreground">
-            Discover how YourApp integrates with your workflow in a 30-minute bespoke session.
+            Discover how our platform can help your team in a personalized 30-minute session.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <Button size="lg">Book a call</Button>
+            <Button size="lg">Book a demo</Button>
             <Button size="lg" variant="outline" className="border-primary/40 text-primary hover:bg-primary/10">
-              Explore our help center
+              View documentation
             </Button>
           </div>
-        </motion.div>
+        </motion.div> */}
       </div>
     </div>
   )

@@ -1,23 +1,27 @@
 import { StripePlan } from "@better-auth/stripe"
 
 export type PlanProps = "basic" | "plus" | "pro"
-export type MetricProps = "analyses" | "projects" |"annotations"
+export type MetricProps = "databases" | "buckets" | "applications"
+
+export const usageMetrics: MetricProps[] = [
+  "databases", "buckets", "applications"
+]
 
 export const userLimits = {
   basic: {
-    projects: 5, 
-    analyses: 5,
-    annotations: 5
+    databases: 5, 
+    buckets: 5,
+    applications: 5
   },
   plus: {
-    projects: 10, 
-    analyses: 50,
-    annotations: 25,
+    databases: 10, 
+    buckets: 50,
+    applications: 25,
   },
   pro: {
-    projects: 25, 
-    analyses: 500,
-    annotations: 250
+    databases: 25, 
+    buckets: 500,
+    applications: 250
   }
 }
 
@@ -31,9 +35,9 @@ export const subscriptionFeatures = [
     buttonText: "Get started for Free",
     description: "Perfect for individuals and small teams getting started",
     features: [
-      `Up to ${userLimits.basic.projects} projects`,
-      `Up to ${userLimits.basic.analyses} analyses`,
-      `Up to ${userLimits.basic.annotations} annotations`
+      `Up to ${userLimits.basic.databases} databases`,
+      `Up to ${userLimits.basic.buckets} buckets`,
+      `Up to ${userLimits.basic.applications} applications`
     ]
   },
   {
@@ -45,9 +49,9 @@ export const subscriptionFeatures = [
     buttonText: "Start Free Trial",
     description: "Ideal for those who want an ideal developer experience",
     features: [
-      `Up to ${userLimits.plus.projects} projects`,
-      `Up to ${userLimits.plus.analyses} analyses`,
-      `Up to ${userLimits.plus.annotations} annotations`
+      `Up to ${userLimits.plus.databases} databases`,
+      `Up to ${userLimits.plus.buckets} buckets`,
+      `Up to ${userLimits.plus.applications} applications`
     ]
   },
   {
@@ -57,23 +61,16 @@ export const subscriptionFeatures = [
     popular: false,
     limitations: userLimits.pro,
     buttonText: "Subscribe today",
-    description: "For those who use heavily analyses and extensive project reads",
+    description: "For those who use heavily buckets and extensive project reads",
     features: [
-      `Up to ${userLimits.pro.projects} projects`,
-      `Up to ${userLimits.pro.analyses} analyses`,
-      `Up to ${userLimits.pro.annotations} annotations`
+      `Up to ${userLimits.pro.databases} databases`,
+      `Up to ${userLimits.pro.buckets} buckets`,
+      `Up to ${userLimits.pro.applications} applications`
     ]
   }
 ]
 
 export const stripePlans: StripePlan[] = [
-  {
-    name: "basic",
-    priceId: process.env.STRIPE_BASIC_ID,
-    lookupKey: "basic_monthly",
-    limits: userLimits.basic,
-    group: "basic"
-  },
   {
     name: "plus",
     priceId: process.env.STRIPE_PLUS_MONTHLY_ID,

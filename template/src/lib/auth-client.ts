@@ -20,7 +20,8 @@ export const authClient = createAuthClient({
         emailOTPClient(),
         passkeyClient(),
         stripeClient({
-            subscription: true
+            subscription: true,
+
         })
     ]
 })

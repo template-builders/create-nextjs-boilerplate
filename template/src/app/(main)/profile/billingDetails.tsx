@@ -88,7 +88,7 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
       day: 'numeric'
     }).format(date)
   }
-
+  
   return (
     <motion.div 
       className="flex flex-col gap-8"
@@ -136,7 +136,7 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
                     </p>
                   </motion.div>
                   
-                  <motion.div 
+                  {/* <motion.div 
                     className="p-4 border rounded-lg border-border hover:bg-accent/5 transition-all duration-200"
                     whileHover={{ scale: 1.02 }}
                   >
@@ -147,18 +147,7 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
                     <p className="text-sm text-muted-foreground">
                       Subscription Active
                     </p>
-                  </motion.div>
-                </div>
-                
-                <div className="flex gap-4">
-                  <Button variant="outline" className="hover:bg-accent/50 transition-all duration-200">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Manage Subscription
-                  </Button>
-                  <Button className="hover:bg-primary/90 transition-all duration-200">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Invoice
-                  </Button>
+                  </motion.div> */}
                 </div>
               </div>
             ) : (
@@ -204,55 +193,6 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
           </CardContent>
         </Card>
       </motion.div>
-
-      {/* <motion.div variants={itemVariants}>
-        <Card className="hover:shadow-lg transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <History className="w-5 h-5 text-primary" />
-              Billing History
-            </CardTitle>
-            <CardDescription>View and download your past invoices and payment history</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Separator />
-            
-            {[1, 2, 3].map((item, index) => (
-              <motion.div 
-                key={item}
-                className="flex items-center justify-between p-4 border rounded-lg border-border hover:bg-accent/5 transition-all duration-200"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Download className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Invoice #{item.toString().padStart(4, '0')}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(Date.now() - item * 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="font-medium">$29.99</span>
-                  <Button variant="ghost" size="sm" className="hover:bg-accent/50 transition-all duration-200">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download
-                  </Button>
-                </div>
-              </motion.div>
-            ))}
-            
-            <Button variant="outline" className="w-full hover:bg-accent/50 transition-all duration-200">
-              View All Invoices
-            </Button>
-          </CardContent>
-        </Card>
-      </motion.div> */}
 
       <motion.div variants={itemVariants}>
         <Card className="hover:shadow-lg transition-all duration-300">

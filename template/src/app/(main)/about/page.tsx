@@ -46,39 +46,39 @@ const values = [
 ]
 
 const stats = [
-  { number: "50K+", label: "Active Users", description: "Teams building on YourApp" },
-  { number: "99.9%", label: "Uptime", description: "Reliability across every region" },
-  { number: "150+", label: "Countries", description: "Global reach on five continents" },
-  { number: "24/7", label: "Support", description: "Support specialists worldwide" }
+  { number: "10K+", label: "Users", description: "Trust our platform" },
+  { number: "99.9%", label: "Uptime", description: "Reliable service" },
+  { number: "50+", label: "Countries", description: "Global reach" },
+  { number: "24/7", label: "Support", description: "Always available" }
 ]
 
 const timeline = [
   {
     year: "2020",
-    title: "YourApp is born",
+    title: "Platform launched",
     description:
-      "We launched with a vision to make advanced tooling accessible to teams of any size. Our founding crew of builders left Big Tech to start fresh.",
+      "We started with a vision to create powerful, accessible tools for modern teams.",
     icon: Rocket
   },
   {
     year: "2021",
-    title: "Scaling globally",
+    title: "Growing globally",
     description:
-      "Expanded our platform to over 60 countries and introduced real-time collaboration features requested by our growing community.",
+      "Expanded our reach and introduced new features based on user feedback.",
     icon: Globe
   },
   {
     year: "2022",
     title: "Enterprise ready",
     description:
-      "Rolled out enterprise-grade security, compliance certifications, and white-glove onboarding for the world’s largest brands.",
+      "Added enterprise-grade security and compliance features for larger organizations.",
     icon: Shield
   },
   {
     year: "2023",
-    title: "Community-first innovation",
+    title: "Community focused",
     description:
-      "Launched our open design system, community advocates program, and marketplace powered by builders around the world.",
+      "Launched community features and open design system for better collaboration.",
     icon: Sparkles
   }
 ]
@@ -121,20 +121,19 @@ export default function AboutPage() {
           transition={{ duration: 0.6 }}
         >
           <Badge variant="outline" className="mb-4 border-primary/30 bg-primary/10 text-primary">
-            Purpose-built for ambitious teams
+            Built for modern teams
           </Badge>
           <h1 className="mb-6 text-4xl font-bold leading-tight text-foreground md:text-6xl">
-            Building the next generation of human-centered tools
+            Creating tools that empower teams to build amazing things
           </h1>
           <p className="text-xl text-muted-foreground">
-            We&apos;re a community of engineers, designers, and strategists dedicated to shaping software that
-            amplifies the work of millions. Our north star is simple: create technology that feels invisible yet makes
-            a remarkable impact.
+            We&apos;re a team of developers and designers passionate about creating software that makes work easier, 
+            more efficient, and more enjoyable. Our goal is to provide the tools and infrastructure teams need to succeed.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <Button size="lg">Our impact report</Button>
+            <Button size="lg">Learn more</Button>
             <Button size="lg" variant="outline" className="border-primary/40 text-primary hover:bg-primary/10">
-              View open roles
+              Get in touch
             </Button>
           </div>
         </motion.div>
@@ -172,9 +171,9 @@ export default function AboutPage() {
             <div>
               <h2 className="text-3xl font-semibold text-foreground">Our mission</h2>
               <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-                To democratize access to powerful business tools and make advanced technology accessible to everyone,
-                regardless of their technical background or company size. We believe that great ideas shouldn&apos;t be
-                limited by complex software or high costs—and we&apos;re relentless about removing those barriers.
+                To create powerful, accessible tools that help teams build better software faster. 
+                We believe great technology should be easy to use and available to everyone, 
+                regardless of team size or technical expertise.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Badge variant="secondary" className="border border-primary/20 bg-background/80 text-primary">
@@ -193,10 +192,10 @@ export default function AboutPage() {
             </div>
             <Card className="border border-transparent bg-background/80 shadow-md backdrop-blur">
               <CardHeader>
-                <CardTitle className="text-lg">How we ship</CardTitle>
+                <CardTitle className="text-lg">How we work</CardTitle>
                 <CardDescription>
-                  Cross-functional squads prototype weekly, validate with real users, and launch incrementally so every
-                  release is rooted in lived customer problems.
+                  We focus on user feedback, iterate quickly, and ship features that solve real problems 
+                  for our community.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -274,14 +273,13 @@ export default function AboutPage() {
           <div>
             <h2 className="text-3xl font-semibold text-foreground">Our story</h2>
             <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-              Founded in 2020 by a team of former tech industry veterans, YourApp was born out of frustration with the
-              complexity and cost of existing business tools. We saw too many great ideas fail not because they weren&apos;t
-              good, but because the tools to bring them to life were either too expensive or too complicated.
+              Founded in 2020, we started with a simple goal: create better tools for modern teams. 
+              We saw too many great ideas fail not because they weren&apos;t good, but because the tools 
+              to bring them to life were either too expensive or too complicated.
             </p>
             <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-              Today, we&apos;re proud to serve over 50,000 users worldwide, from solo entrepreneurs to Fortune 500
-              companies. Our platform has processed millions of transactions, helped launch thousands of businesses, and
-              continues to evolve based on the feedback and needs of our amazing community.
+              Today, we&apos;re proud to serve thousands of users worldwide, from solo developers to 
+              large teams. Our platform continues to evolve based on the feedback and needs of our community.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               {cultureHighlights.map((highlight) => (
@@ -297,11 +295,11 @@ export default function AboutPage() {
           </div>
           <Card className="border border-transparent bg-primary/10 shadow-md backdrop-blur">
             <CardHeader>
-              <CardTitle className="text-xl text-primary">Community snapshots</CardTitle>
+              <CardTitle className="text-xl text-primary">Community highlights</CardTitle>
               <CardDescription className="text-base text-primary/80">
-                • 3,800+ community-led events<br />
-                • 400 ecosystem partners<br />
-                • 95% of features influenced by customer feedback
+                • 100+ community events<br />
+                • 50+ ecosystem partners<br />
+                • 90% of features influenced by user feedback
               </CardDescription>
             </CardHeader>
           </Card>
@@ -313,17 +311,17 @@ export default function AboutPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.75 }}
         >
-          <p className="text-sm font-medium uppercase tracking-widest text-primary">Join the movement</p>
+          <p className="text-sm font-medium uppercase tracking-widest text-primary">Join our community</p>
           <h3 className="mt-4 text-3xl font-semibold text-foreground">
-            Help us build tools that empower the next wave of innovators.
+            Help us build tools that empower the next generation of developers.
           </h3>
           <p className="mt-3 text-muted-foreground">
-            Explore how YourApp can accelerate your roadmap—or bring your superpowers to our team.
+            Explore how our platform can accelerate your development—or join our team.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <Button size="lg">Talk to us</Button>
+            <Button size="lg">Get started</Button>
             <Button size="lg" variant="outline" className="border-primary/40 text-primary hover:bg-primary/10">
-              Explore careers
+              Contact us
             </Button>
           </div>
         </motion.div>

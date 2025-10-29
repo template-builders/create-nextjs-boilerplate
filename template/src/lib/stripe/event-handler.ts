@@ -2,6 +2,8 @@ import Stripe from "stripe";
 import { db } from "@/db";
 import { usage } from "@/db/schemas/plan";
 import { eq } from "drizzle-orm";
+import { subscription } from "@/db/schemas/auth";
+import { addMonthsUTC, nowUTC } from "../cron/date";
 
 function hasCycled(prevSub: Partial<Stripe.Subscription>, currSub: Stripe.Subscription) {
     const prev = prevSub?.items?.data.sort((a, b) => a.id.localeCompare(b.id)) ?? []
@@ -44,7 +46,25 @@ export async function stripeEventHandler(event: Stripe.Event) {
                 console.log(`Reset usages for user: ${subscriptionData?.referenceId}`)
 
             }
+            break
+        case "customer.subscription.deleted":
+            event.data.object.id
+            const periodStart = nowUTC()
+            const periodEnd = addMonthsUTC(periodStart, 1)
+            await Promise.all([
+                db.update(subscription).set({
+                    plan: "basic",
+                    status: "active",
+                    periodStart,
+                    stripeSubscriptionId: null,
+                    periodEnd
+                }).where(eq(subscription.id, event.data.object.id)),
+                db.update(usage).set({
+                    count: 0
+                }).where (eq(usage.subscriptionId, event.data.object.id))
+            ])
         default:
+            console.log("Could not match webhook: ", event.type)
             break
     }
 }

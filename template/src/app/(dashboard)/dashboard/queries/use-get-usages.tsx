@@ -3,7 +3,7 @@
 import { usage } from "@/db/schemas/plan";
 import { useQuery } from "@tanstack/react-query";
 import { userLimits } from "@/lib/stripe";
-import { PlanProps, MetricProps } from "@/lib/stripe";
+import { PlanProps, MetricProps} from "@/lib/stripe";
 
 export function useUserUsages() {
 

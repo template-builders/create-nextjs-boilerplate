@@ -25,7 +25,7 @@ import { useForm } from "react-hook-form"
 import { useEffect, useState } from "react"
 import { authClient } from "@/lib/auth-client"
 import { toast } from "sonner"
-import { UserData } from "../../../hooks/use-user-data"
+import { UserData } from "@/hooks/use-user-data"
 
 export function PasswordForm({data}: {data: UserData}) {
   const [loading, setLoading] = useState<boolean>(false)
