@@ -67,7 +67,8 @@ export const PasswordSignInForm = () => {
             router.push("/")
           },
           onError: (ctx) => {
-            toast.error(ctx.error.message)
+            const description = ctx.error.message.includes("Email not verified") ? "Check your inbox for a verification email" : ""
+            toast.error(ctx.error.message, {description})
           }
         }
       })
@@ -102,7 +103,7 @@ export const PasswordSignInForm = () => {
               </FormItem>
             )}
           />
-          <Button type="submit" disabled={loading}>{loading ? <Loader2 className="animate-spin"/> : "Add"}</Button>
+          <Button type="submit" disabled={loading}>{loading ? <Loader2 className="animate-spin"/> : "Sign In"}</Button>
         </form>
       </Form>
     )

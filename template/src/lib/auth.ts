@@ -13,6 +13,7 @@ import { usage } from "@/db/schemas/plan";
 import { stripeEventHandler } from "./stripe/event-handler";
 import { sendChangeEmail } from "./resend/change-email";
 import { addMonthsUTC, nowUTC } from "./cron/date";
+import { accessControl, moderatorRole, userRole, adminRole } from "./permissions";
 
 export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2025-08-27.basil",
@@ -69,12 +70,13 @@ export const auth = betterAuth({
         },
         onPasswordReset: async ({ user }, request) => {
             console.log(`Password for user ${user.email} has been reset.`);
-        },
+        }
     },
     emailVerification: {
       sendVerificationEmail: async ({user, url, token}, request) => {
         await verificationEmail(user, url)
       },
+      sendOnSignIn: true,
       sendOnSignUp: true,
       autoSignInAfterVerification: true
     },
@@ -93,7 +95,14 @@ export const auth = betterAuth({
         },
     },
     plugins: [
-        admin(),
+        admin({
+            ac: accessControl,
+            roles: {
+                user: userRole,
+                moderator: moderatorRole,
+                admin: adminRole
+            }
+        }),
         phoneNumber(),
         emailOTP({
             otpLength: 8,

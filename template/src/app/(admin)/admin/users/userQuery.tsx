@@ -4,15 +4,24 @@ import { useQuery } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
 import { useState, useCallback, useMemo } from "react";
 
-export function useListUsers(initialPageSize = 10, initialPage = 1) {
-  const [pageSize, setPageSize] = useState(initialPageSize);
-  const [currentPage, setCurrentPage] = useState(initialPage);
+type SearchByType = "email" | "name" | undefined
+
+export function useListUsers(initialPageSize = 10, initialPage = 1, initialSearch = "", initialSearchBy: SearchByType  = "email") {
+  const [pageSize, setPageSize] = useState<number>(initialPageSize);
+  const [currentPage, setCurrentPage] = useState<number>(initialPage);
+  const [search, setSearch] = useState<string>(initialSearch)
+  const [searchBy, setSearchBy] = useState<"email" | "name">(initialSearchBy)
 
   const query = useQuery({
-    queryKey: ["admin-list-users", { page: currentPage, pageSize }],
+    queryKey: ["admin-list-users", { page: currentPage, pageSize, search, searchBy }],
     queryFn: async () => {
       const { error, data } = await authClient.admin.listUsers({
-        query: { limit: pageSize, offset: (currentPage - 1) * pageSize },
+        query: { 
+          limit: pageSize, 
+          offset: (currentPage - 1) * pageSize,
+          searchValue: search,
+          searchField: searchBy
+        },
       });
       if (error) throw error;
 
@@ -42,10 +51,12 @@ export function useListUsers(initialPageSize = 10, initialPage = 1) {
     () => ({
       page: currentPage,
       pageSize,
+      search,
+      searchBy,
       hasNext: (query.data?.totalPages ?? 1) > currentPage,
       hasPrev: currentPage > 1,
     }),
-    [currentPage, pageSize, query.data?.totalPages]
+    [currentPage, pageSize, query.data?.totalPages, search, searchBy]
   );
 
   return {
@@ -58,10 +69,13 @@ export function useListUsers(initialPageSize = 10, initialPage = 1) {
     pageSize: meta.pageSize,
     hasNext: meta.hasNext,
     hasPrev: meta.hasPrev,
+
     nextPage,
     prevPage,
     setPage,
     setPageSize: setLimit,
+    setSearch,
+    setSearchBy,
 
     isLoading: query.isLoading,
     isFetching: query.isFetching,

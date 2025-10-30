@@ -45,15 +45,14 @@ import {
   Shield, 
   Calendar,
   User,
-  Phone,
   CheckCircle,
   XCircle,
   Save,
   X,
   Settings,
-  Mail,
   KeyRound,
-  HatGlasses
+  HatGlasses,
+  Loader2
 } from "lucide-react";
 import { UserWithRole } from "better-auth/plugins";
 import { authClient } from "@/lib/auth-client";
@@ -81,29 +80,43 @@ function formatDate(date: Date): string {
   });
 }
 
+
 export default function AdminUsersPage() {
-  const [query, setQuery] = useState("");
+  const [searchInput, setSearchInput] = useState<string>("")
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [goToPageValue, setGoToPageValue] = useState(1);
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [open, setOpen] = useState(false)
+  const [manageOpen, setManageOpen] = useState(false)
+  const [createOpen, setCreateOpen] = useState(false)
   const [editFormData, setEditFormData] = useState({
     name: '',
     email: '',
     role: '',
     banReason: ''
   });
+  const [createUserData, setCreateUserData] = useState({
+    email: '',
+    password : '',
+    name: '',
+    role: ''
+  })
   const listData = useListUsers()
 
-  useEffect(() => {
-    setGoToPageValue(listData.page);
-  }, [listData.page]);
+  const {data} = authClient.useSession()
+  const currentUser = data?.user
+
+  const cantEditUser = (user: UserWithRole) => {
+    return (user.id === currentUser?.id || user.role === "admin" || (currentUser?.role === "moderator" && user.role === "moderator")) 
+  }
 
   useEffect(() => {
-    setRowsPerPage(listData.pageSize);
-  }, [listData.pageSize]);
+    const timer = setTimeout(() => {
+      listData.setSearch(searchInput);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchInput, listData]);
 
   const paginationRange = () => {
     const start = Math.max(1, listData.page - 2)
@@ -148,6 +161,7 @@ export default function AdminUsersPage() {
       toast.error('Error saving user. Please try again.');
     } finally {
       setIsLoading(false);
+      setManageOpen(false)
     }
   };
 
@@ -162,6 +176,40 @@ export default function AdminUsersPage() {
     }
     setIsEditMode(false);
   };
+
+  const handleCreateUser = async () => {
+    setIsLoading(true)
+    try {
+      await authClient.admin.createUser({
+        email: createUserData.email,
+        password: createUserData.password,
+        name: createUserData.name,
+        role: createUserData.role as "user" | "admin",
+        fetchOptions: {
+          onSuccess: async () => {
+            toast.success("Successfully created user")
+            listData.refetch()
+            clearCreateUser()
+          },
+          onError: (ctx) => {
+            toast.error(ctx.error.message || "Failed to create user")
+          }
+        }
+      })
+    } finally {
+      setIsLoading(false)
+      setCreateOpen(false)
+    }
+  }
+
+  const clearCreateUser = () => {
+    setCreateUserData({
+      email: '',
+      password: '',
+      name: '',
+      role: ''
+    })
+  }
 
   type ActionProps = "impersonate" | "toggle-ban" | "revoke-sessions" | "delete"
 
@@ -191,17 +239,97 @@ export default function AdminUsersPage() {
         toast.success("Successfully impersonated user")
       } else return
       
+      setManageOpen(false)
       listData.refetch();
     } catch (error) {
       toast.error(`Error performing ${action}. Please try again.`);
     } finally {
-      setOpen(false)
       setIsLoading(false);
     }
   };
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex flex-col md:flex-row md:items-end md:gap-4 gap-2">
+        <div className="flex flex-col gap-1 w-full md:w-[240px]">
+          <Label htmlFor="admin-search">Search</Label>
+          <Input
+            id="admin-search"
+            placeholder="Enter a query"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-1 w-full md:w-[160px]">
+          <Label htmlFor="admin-searchby-ui-static">Search By</Label>
+          <Select defaultValue="email" onValueChange={(value: "email" | "name") => listData.setSearchBy(value)}>
+            <SelectTrigger id="admin-searchby-ui-static" className="w-full">
+              <SelectValue placeholder="Search By" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="email">Email</SelectItem>
+              <SelectItem value="name">Name</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex w-full justify-end mb-2">
+          <Sheet onOpenChange={setCreateOpen} open={createOpen}>
+            <SheetTrigger asChild>
+              <Button variant="default">Create User</Button>
+            </SheetTrigger>
+            <SheetContent className="w-full max-w-md px-2">
+              <SheetHeader>
+                <SheetTitle>Create a new user</SheetTitle>
+                <SheetDescription>Fill out the details to create a new user.</SheetDescription>
+              </SheetHeader>
+              <div className="py-4 flex flex-col gap-4">
+                <div className="flex flex-col gap-1">
+                  <Label htmlFor="create-user-email">Email</Label>
+                  <Input 
+                    id="create-user-email" type="email" placeholder="Email address" value={createUserData.email}
+                    onChange={(event) => setCreateUserData((prev) => ({...prev, email: event.target.value}))}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Label htmlFor="create-user-password">Password</Label>
+                  <Input 
+                    id="create-user-password" type="password" placeholder="Password" value={createUserData.password}
+                    onChange={(event) => setCreateUserData((prev) => ({...prev, password: event.target.value}))}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Label htmlFor="create-user-name">Name</Label>
+                  <Input 
+                    id="create-user-name" placeholder="Full Name" value={createUserData.name}
+                    onChange={(event) => setCreateUserData((prev) => ({...prev, name: event.target.value}))}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Label htmlFor="create-user-role">Role</Label>
+                  <Select defaultValue="user" onValueChange={(value) => setCreateUserData((prev) => ({...prev, role: value}))}>
+                    <SelectTrigger id="create-user-role" className="w-full">
+                      <SelectValue placeholder="Select Role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="moderator">Moderator</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex justify-end pt-2">
+                  <Button 
+                    onClick={handleCreateUser}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <Loader2 className="animate-spin duration-300"/> : <div>Create User</div> }
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
       <Card>
         <CardHeader className="gap-4">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -303,13 +431,13 @@ export default function AdminUsersPage() {
                     </TableCell>
                     <TableCell className="px-2 py-3 align-middle text-sm">{formatDate(user.createdAt)}</TableCell>
                     <TableCell className="px-2 py-3 align-middle text-right">
-                      <Sheet open={open} onOpenChange={setOpen}>
+                      <Sheet open={manageOpen} onOpenChange={setManageOpen}>
                         <SheetTrigger asChild>
                           <Button 
                             variant="outline" 
                             size="sm"
                             onClick={() => handleOpenUserSheet(user)}
-                            disabled={isLoading || user.role === "admin"}
+                            disabled={isLoading || cantEditUser(user)}
                           >
                             <Settings className="h-4 w-4 mr-1" />
                             Manage
@@ -391,27 +519,6 @@ export default function AdminUsersPage() {
                                       <p className="text-sm text-muted-foreground">{formatDate(selectedUser.createdAt)}</p>
                                     </div>
                                   </div>
-
-                                  {/* <div className="flex items-center gap-2">
-                                    <Phone className="h-4 w-4 text-muted-foreground" />
-                                    <div>
-                                      <p className="text-sm font-medium">Phone</p>
-                                      {isEditMode ? (
-                                        <Input
-                                          value={editFormData.phoneNumber}
-                                          onChange={(e) => setEditFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                                          className="mt-1"
-                                          placeholder="Phone number"
-                                          disabled={isLoading}
-                                        />
-                                      ) : (
-                                        <p className="text-sm text-muted-foreground">
-                                          {(selectedUser as any).phoneNumber || 'Not provided'}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div> */}
-
                                   <div className="flex items-center gap-2">
                                     <Shield className="h-4 w-4 text-muted-foreground" />
                                     <div>
@@ -423,8 +530,8 @@ export default function AdminUsersPage() {
                                           </SelectTrigger>
                                           <SelectContent>
                                             <SelectItem value="admin">Admin</SelectItem>
+                                            <SelectItem value ="moderator">Moderator</SelectItem>
                                             <SelectItem value="user">User</SelectItem>
-                                            {/* <SelectItem value="system">System</SelectItem> */}
                                           </SelectContent>
                                         </Select>
                                       ) : (

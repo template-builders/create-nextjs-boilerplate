@@ -15,7 +15,8 @@ export default async function middleware(request: NextRequest) {
         return NextResponse.redirect(redirectURL)
     }
 
-    if (pathname.startsWith("/admin") && session.user.role !== "admin") {
+    if (pathname.startsWith("/admin") && !
+    ["admin", "moderator"].includes(session.user.role!) ) {
         const redirectURL = new URL("/", request.url)
         redirectURL.searchParams.set("next", pathname)
         return NextResponse.redirect(redirectURL)
