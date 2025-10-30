@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const targetDir = process.argv[2];
 if (!targetDir) {
-  console.error("Usage: npx create-my-stack <project-name>");
+  console.error("Usage: npx @starter-templates/create-nextjs-boilerplate <project-name>");
   process.exit(1);
 }
 
