@@ -1,6 +1,6 @@
 {
   "name": "@starter-templates/create-nextjs-boilerplate",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "bin": {
     "nextjs-boilerplate": "bin/init-app.js"
