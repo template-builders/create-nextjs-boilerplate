@@ -29,11 +29,9 @@ export const auth = betterAuth({
     user: {
         deleteUser: {
             enabled: true,
-            beforeDelete: async (user, request) => {
-                const subscriptionData = await db.query.subscription.findFirst({where: (subscription, {eq}) => eq(subscription.referenceId, user.id)})
-                if (!subscriptionData) throw new APIError("BAD_REQUEST", {message: "Failed to delete stripe data, please try again"})
-                
-                await stripeClient.customers.del(subscriptionData.stripeCustomerId as string)
+            beforeDelete: async (auth) => {
+                const userData = await db.query.user.findFirst({where: (user, {eq}) => eq(user.id, auth.id)})
+                await stripeClient.customers.del(userData!.stripeCustomerId as string)
                 console.log("Successfully deleted stripe data")
             }
         },

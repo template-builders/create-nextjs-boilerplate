@@ -17,8 +17,8 @@ const examples: SidebarLinkProps[] = [
     title: "Main",
     children: [
       {link: "/admin", icon: Home, title: "Home"},
-      {link: "/admin/users", icon: User, title: "User" },
-      {link: "/admin/logs", icon: Logs, title: "Logs" }
+      {link: "/admin/users", icon: User, title: "Users" },
+      {link: "/admin/reports", icon: Logs, title: "Reports" }
     ] 
   }
 ]

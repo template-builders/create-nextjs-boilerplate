@@ -4,6 +4,7 @@ import { usage } from "@/db/schemas/plan";
 import { eq } from "drizzle-orm";
 import { subscription } from "@/db/schemas/auth";
 import { addMonthsUTC, nowUTC } from "../cron/date";
+import { stripeClient } from "../auth";
 
 function hasCycled(prevSub: Partial<Stripe.Subscription>, currSub: Stripe.Subscription) {
     const prev = prevSub?.items?.data.sort((a, b) => a.id.localeCompare(b.id)) ?? []
@@ -22,49 +23,114 @@ function hasCycled(prevSub: Partial<Stripe.Subscription>, currSub: Stripe.Subscr
 }
 
 export async function stripeEventHandler(event: Stripe.Event) {
-    switch (event.type) {
-        case "customer.subscription.updated":
-            
-            const prevObject = event.data.previous_attributes
-            const currObject = event.data.object
+    const idempotencyKey = crypto.randomUUID()
+    try {
+        switch (event.type) {
+            case "customer.subscription.updated":
+                
+                const prevObject = event.data.previous_attributes
+                const currObject = event.data.object
 
-            if (prevObject?.latest_invoice && prevObject.items && hasCycled(prevObject, currObject)) {
-                const subscriptionData = await db.query.subscription.findFirst({
-                    where: (subscription, {eq}) => eq(subscription.stripeSubscriptionId, currObject.id),
-                    with: {
-                        usages: true
+                if (prevObject?.latest_invoice && prevObject.items && hasCycled(prevObject, currObject)) {
+                    const subscriptionData = await db.query.subscription.findFirst({
+                        where: (subscription, {eq}) => eq(subscription.stripeSubscriptionId, currObject.id),
+                        with: {
+                            usages: true
+                        }
+                    })
+                    const usageData = subscriptionData?.usages ?? []
+                    async function updateUsage(subscriptionId: string) {
+                        return db.update(usage).set({
+                            updatedAt: new Date(),
+                            count: 0
+                        }).where(eq(usage.subscriptionId, subscriptionId))
                     }
-                })
-                const usageData = subscriptionData?.usages ?? []
-                async function updateUsage(subscriptionId: string) {
-                    return db.update(usage).set({
-                        updatedAt: new Date(),
-                        count: 0
-                    }).where(eq(usage.subscriptionId, subscriptionId))
-                }
-                await Promise.all(usageData.map((data) => updateUsage(data.subscriptionId)))
-                console.log(`Reset usages for user: ${subscriptionData?.referenceId}`)
+                    await Promise.all(usageData.map((data) => updateUsage(data.subscriptionId)))
+                    console.log(`Reset usages for user: ${subscriptionData?.referenceId}`)
 
-            }
-            break
-        case "customer.subscription.deleted":
-            event.data.object.id
-            const periodStart = nowUTC()
-            const periodEnd = addMonthsUTC(periodStart, 1)
-            await Promise.all([
-                db.update(subscription).set({
-                    plan: "basic",
-                    status: "active",
-                    periodStart,
-                    stripeSubscriptionId: null,
-                    periodEnd
-                }).where(eq(subscription.id, event.data.object.id)),
-                db.update(usage).set({
-                    count: 0
-                }).where (eq(usage.subscriptionId, event.data.object.id))
-            ])
-        default:
-            console.log("Could not match webhook: ", event.type)
-            break
+                }
+                break
+            case "customer.subscription.deleted":
+                const periodStart = nowUTC()
+                const periodEnd = addMonthsUTC(periodStart, 1)
+                await Promise.all([
+                    db.update(subscription).set({
+                        plan: "basic",
+                        status: "active",
+                        periodStart,
+                        stripeSubscriptionId: null,
+                        periodEnd
+                    }).where(eq(subscription.id, event.data.object.id)),
+                    db.update(usage).set({
+                        count: 0
+                    }).where (eq(usage.subscriptionId, event.data.object.id))
+                ])
+                break
+            case "checkout.session.completed":
+                const checkoutObject = event.data.object
+                
+                if (checkoutObject.mode === "subscription" && checkoutObject.customer && checkoutObject.subscription) {
+                    const currentSession = await stripeClient.checkout.sessions.retrieve(checkoutObject.id,  {
+                        expand: ["subscription.latest_invoice.confirmation_secret", "setup_intent"]
+                    }, {idempotencyKey})
+
+                    const subscription = currentSession.subscription as Stripe.Subscription
+                    const invoice = subscription.latest_invoice as Stripe.Invoice
+                    const clientSecret = invoice.confirmation_secret?.client_secret
+                    const paymentIntentId = clientSecret?.split("_secret_")[0]
+
+                    if (paymentIntentId) {
+                        const paymentIntent = await stripeClient.paymentIntents.retrieve(paymentIntentId)
+                        await stripeClient.customers.update(checkoutObject.customer.toString(), {
+                            invoice_settings: {default_payment_method: paymentIntent.payment_method?.toString()}
+                        }, {idempotencyKey})
+                    }
+                }
+                console.log("Processed completed checkout session")
+                break
+            case "invoice.paid":
+            default:
+                console.log("Could not match webhook type: ", event.type)
+                break
+        }
+    } catch (error: unknown) {
+        if (error instanceof Stripe.errors.StripeCardError) {
+            console.error("[stripe] Card error", {
+                code: error.code,
+                message: error.message,
+                status: error.statusCode,
+                type: error.type,
+            })
+        } else if (error instanceof Stripe.errors.StripeInvalidRequestError) {
+            console.error("[stripe] Invalid request", {
+                code: error.code,
+                message: error.message,
+                param: error.param,
+                requestId: error.requestId,
+                status: error.statusCode,
+            })
+        } else if (error instanceof Stripe.errors.StripeAPIError) {
+            console.error("[stripe] API error", {
+                message: error.message,
+                requestId: error.requestId,
+                status: error.statusCode,
+            })
+        } else if (error instanceof Stripe.errors.StripeError) {
+            console.error("[stripe] General Stripe error", {
+                type: error.type,
+                message: error.message,
+                requestId: error.requestId,
+                status: error.statusCode,
+            })
+        } else if (error instanceof Error) {
+            console.error("[stripe] Unexpected error", {
+                name: error.name,
+                message: error.message,
+                stack: error.stack,
+            })
+        } else {
+            console.error("[stripe] Unknown error", error)
+        }
+        throw error
     }
 }
