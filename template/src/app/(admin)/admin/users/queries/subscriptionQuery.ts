@@ -5,7 +5,7 @@ import { authClient } from "@/lib/auth-client";
 export function useGetSubscription(user: UserWithRole) {
 
   const query = useQuery({
-    queryKey: ["user-subscription", user.id],
+    queryKey: ["admin-user-subscription", user.id],
     queryFn: async () => {
       const {data, error} = await authClient.subscription.list({
         query: {referenceId: user.id},

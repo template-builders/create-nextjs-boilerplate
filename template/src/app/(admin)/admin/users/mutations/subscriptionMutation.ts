@@ -9,6 +9,7 @@ export type SubscriptionMutationPayload = Subscription & {
 }
 
 interface SubscriptionMutationResponse {
+  id: string
   success: boolean
   message?: string
 }
@@ -33,9 +34,9 @@ export function useUpdateSubscription() {
       }
       return await response.json()
     },
-    onSuccess: async () => {
+    onSuccess: async (ctx) => {
       await Promise.all([
-        queryClient.invalidateQueries({queryKey: ["admin-update-subscription"]})
+        queryClient.invalidateQueries({queryKey: ["admin-user-subscription", ctx.id]})
       ])
     },
     retry: 0

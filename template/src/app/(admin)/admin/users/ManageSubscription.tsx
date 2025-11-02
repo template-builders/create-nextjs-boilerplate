@@ -45,7 +45,7 @@ import { Subscription } from "@better-auth/stripe";
 import { useGetSubscription } from "./queries/subscriptionQuery";
 import { SubscriptionMutationPayload, useUpdateSubscription } from "./mutations/subscriptionMutation";
 
-export type ActionTypes = "modify" | "extend" | "reactivate" | "seats";
+export type ActionTypes = "modify" | "reactivate" | "seats" | "remove-cancellation";
 export type PlanTypes = "basic" | "plus" | "pro";
 
 interface ManageSubscriptionProps {
@@ -129,13 +129,11 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
 
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string>("");
-  const [extendMonths, setExtendMonths] = useState<string>("1");
   const [seats, setSeats] = useState<string>("1");
   const [actionType, setActionType] = useState<ActionTypes | null>(null);
 
   const resetInteractiveState = useCallback(() => {
     setActionType(null);
-    setExtendMonths("1");
   }, []);
 
   useEffect(() => {
@@ -172,15 +170,6 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
         payload.plan = selectedPlan;
       }
 
-      if (action === "extend") {
-        const monthsValue = parseInt(extendMonths, 10);
-        if (isNaN(monthsValue) || monthsValue <= 0) {
-          toast.error("Enter a valid number of months.");
-          return false;
-        }
-        payload.months = monthsValue;
-      }
-
       if (action === "seats") {
         const seatsValue = parseInt(seats, 10);
         if (isNaN(seatsValue) || seatsValue <= 0) {
@@ -189,8 +178,6 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
         }
         payload.seats = seatsValue;
       }
-
-      if (action !== "modify" && action !== "seats" && subscriptionQuery?.subscription?.plan && !payload.plan) payload.plan = subscriptionQuery.subscription.plan;
 
       setIsLoading(true);
       try {
@@ -205,7 +192,7 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
       } finally {
         setIsLoading(false);
       }
-    },[disabled, extendMonths, resetInteractiveState, seats, selectedPlan, subscriptionQuery.subscription, user,]
+    },[disabled, resetInteractiveState, seats, selectedPlan, subscriptionQuery.subscription, user,]
   );
 
   const handleSheetToggle = useCallback(
@@ -406,61 +393,6 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
                     </div>
                   )}
 
-                  {subscriptionQuery.subscription.status === "active" && (
-                    <div className="space-y-2">
-                      {actionType === "extend" ? (
-                        <div className="space-y-2 p-3 border rounded-lg">
-                          <Label htmlFor="extend-months">
-                            Extend by (months)
-                          </Label>
-                          <Input
-                            id="extend-months"
-                            type="number"
-                            min="1"
-                            value={extendMonths}
-                            onChange={(e) => setExtendMonths(e.target.value)}
-                            placeholder="Enter number of months"
-                          />
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setActionType(null);
-                                setExtendMonths("1");
-                              }}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={async () => {
-                                const success = await handleAction("extend");
-                                if (success) {
-                                  setActionType(null);
-                                }
-                              }}
-                              disabled={isLoading}
-                            >
-                              <Calendar className="h-4 w-4 mr-1" />
-                              Extend
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                          onClick={() => setActionType("extend")}
-                          disabled={isLoading}
-                        >
-                          <Calendar className="h-4 w-4 mr-2" />
-                          Extend Subscription
-                        </Button>
-                      )}
-                    </div>
-                  )}
-
                   {subscriptionQuery.subscription.seats !== undefined &&
                     subscriptionQuery.subscription.status === "active" && (
                       <div className="space-y-2">
@@ -522,31 +454,59 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
                       </div>
                     )}
 
-                  {subscriptionQuery.subscription.status === "active" && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                          disabled={isLoading}
-                        >
-                          <XCircle className="h-4 w-4 mr-2" />
-                          Cancel Subscription
-                          <ChevronDown className="h-3 w-3 ml-auto" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem disabled={isLoading}>
-                          <Clock className="h-4 w-4 mr-2" />
-                          Cancel at Period End
-                        </DropdownMenuItem>
-                        <DropdownMenuItem disabled={isLoading}>
-                          <XCircle className="h-4 w-4 mr-2" />
-                          Cancel Immediately
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
+                  {(() => {
+                    if (subscriptionQuery.subscription.status === "active")
+                    return subscriptionQuery.subscription.cancelAtPeriodEnd ? (
+                      <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/5">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-destructive">
+                              <AlertCircle className="h-4 w-4" />
+                              <span className="text-sm font-semibold">Cancellation scheduled</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              This plan will end on{" "}
+                              {formatDate(subscriptionQuery.subscription.periodEnd)}
+                              . Remove the cancellation to keep the subscription active.
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAction("remove-cancellation")}
+                            disabled={isLoading}
+                          >
+                            <RotateCcw className="h-4 w-4 mr-2" />
+                            Keep Active
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                            disabled={isLoading}
+                          >
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Cancel Subscription
+                            <ChevronDown className="h-3 w-3 ml-auto" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem disabled={isLoading}>
+                            <Clock className="h-4 w-4 mr-2" />
+                            Cancel at Period End
+                          </DropdownMenuItem>
+                          <DropdownMenuItem disabled={isLoading}>
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Cancel Immediately
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )
+                  })()}
 
                   {subscriptionQuery.subscription.status === "canceled" && (
                     <Button

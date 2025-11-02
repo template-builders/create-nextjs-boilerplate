@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripeClient } from "@/lib/auth";
 import { Subscription } from "@better-auth/stripe";
+import { ActionTypes } from "@/app/(admin)/admin/users/ManageSubscription";
 
 type ExtendedSubscription = Subscription & {
-    action?: string
+    action?: ActionTypes
     months?: number
     seats?: number
     plan?: "basic" | "plus" | "pro"
@@ -37,7 +38,7 @@ async function getSubAndItem(subscriptionId: string) {
 export async function POST(request: NextRequest) {
     const body: ExtendedSubscription = await request.json()
     const idempotencyKey = request.headers.get("x-idempotency-key") ?? crypto.randomUUID();
-
+    let data;
     try {
         if (body.action === "modify") {
             if (!body.stripeSubscriptionId) {
@@ -50,18 +51,21 @@ export async function POST(request: NextRequest) {
                     cancel_at_period_end: true
                 }, {idempotencyKey})
             } else {
-                const {subscription, item} = await getSubAndItem(body.stripeSubscriptionId)
-                await stripeClient.subscriptions.update(body.stripeSubscriptionId, {
+                const { item } = await getSubAndItem(body.stripeSubscriptionId)
+                data = await stripeClient.subscriptions.update(body.stripeSubscriptionId, {
                     items: [{id: item.id, price: priceMap[body.plan]}],
                     proration_behavior: "none",
                     
                 }, {idempotencyKey})
             }
-            return NextResponse.json({message: "Successfully handled action", success: true})
+        } else if (body.action === "remove-cancellation" && body.stripeSubscriptionId) {
+            await stripeClient.subscriptions.update(body.stripeSubscriptionId, {
+                cancel_at_period_end: false
+            })
         }
-
+        return NextResponse.json({message: "Successfully handled action", success: true, id: body.referenceId})
     } catch (e) {
         console.log(e)
-        throw new Error("")
+        throw new Error("Failed to process action")
     }
 }
