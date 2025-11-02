@@ -42,10 +42,11 @@ import {
 import { toast } from "sonner";
 import { UserWithRole } from "better-auth/plugins";
 import { Subscription } from "@better-auth/stripe";
-import { authClient } from "@/lib/auth-client";
+import { useGetSubscription } from "./queries/subscriptionQuery";
+import { SubscriptionMutationPayload, useUpdateSubscription } from "./mutations/subscriptionMutation";
 
-type ActionTypes = "modify" | "extend" | "reactivate" | "seats";
-type PlanTypes = "basic" | "plus" | "pro";
+export type ActionTypes = "modify" | "extend" | "reactivate" | "seats";
+export type PlanTypes = "basic" | "plus" | "pro";
 
 interface ManageSubscriptionProps {
   user: UserWithRole;
@@ -53,7 +54,6 @@ interface ManageSubscriptionProps {
   onOpenChange: (open: boolean) => void;
   disabled?: boolean;
   hideTrigger?: boolean;
-  onSubscriptionUpdated?: () => void;
 }
 
 function formatDate(date: Date | string | undefined): string {
@@ -70,7 +70,7 @@ function formatDate(date: Date | string | undefined): string {
 }
 
 function formatPlanName(plan: string): string {
-  return plan.slice(0, 1).toUpperCase() + plan.slice(1);
+  return plan ? plan.slice(0, 1).toUpperCase() + plan.slice(1) : "";
 }
 
 function getStatusBadge(status: Subscription["status"]) {
@@ -123,17 +123,10 @@ function getStatusBadge(status: Subscription["status"]) {
   }
 }
 
-export function ManageSubscription({
-  user,
-  open,
-  onOpenChange,
-  disabled = false,
-  hideTrigger = false,
-  onSubscriptionUpdated,
-}: ManageSubscriptionProps) {
-  const [subscription, setSubscription] = useState<Subscription | null>(
-    null,
-  );
+export function ManageSubscription({ user, open, onOpenChange, disabled = false, hideTrigger = false}: ManageSubscriptionProps) {
+  const subscriptionQuery = useGetSubscription(user)
+  const subscriptionMutation = useUpdateSubscription()
+
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [extendMonths, setExtendMonths] = useState<string>("1");
@@ -145,66 +138,30 @@ export function ManageSubscription({
     setExtendMonths("1");
   }, []);
 
-  const fetchSubscription = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      await authClient.subscription.list({
-        query: {
-          referenceId: user.id,
-        },
-        fetchOptions: {
-          onSuccess: (ctx) => {
-            const nextSubscription = ctx.data?.[0] ?? null;
-            setSubscription(nextSubscription);
-            if (nextSubscription) {
-              setSelectedPlan(nextSubscription.plan);
-              setSeats(nextSubscription.seats?.toString() || "1");
-            } else {
-              setSelectedPlan("");
-              setSeats("1");
-            }
-          },
-          onError: (ctx) => {
-            toast.error(
-              ctx.error.message || "Failed to get user subscription",
-            );
-            setSubscription(null);
-          },
-        },
-      });
-    } catch (error) {
-      toast.error("Failed to get user subscription");
-      setSubscription(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user.id]);
-
   useEffect(() => {
     if (!open) {
-      setSubscription(null);
       setSelectedPlan("");
       setSeats("1");
       resetInteractiveState();
       return;
     }
 
-    fetchSubscription();
-  }, [open, fetchSubscription, resetInteractiveState]);
+  }, [open, resetInteractiveState]);
 
   const availablePlans: PlanTypes[] = ["basic", "plus", "pro"];
-  const otherPlans = subscription ? availablePlans.filter((plan) => plan !== subscription.plan) : availablePlans;
+  const otherPlans = subscriptionQuery.subscription ? 
+  availablePlans.filter((plan) => plan !== subscriptionQuery?.subscription?.plan) : availablePlans;
 
-  const statusInfo = subscription ? getStatusBadge(subscription.status) : null;
+  const statusInfo = subscriptionQuery.subscription ? getStatusBadge(subscriptionQuery.subscription.status) : null;
   const StatusIcon = statusInfo?.icon || AlertCircle;
 
   const handleAction = useCallback(
     async (action: ActionTypes): Promise<boolean> => {
-      if (disabled) return false;
+      if (disabled || !subscriptionQuery.subscription) return false;
 
-      const payload: Record<string, unknown> = {
-        ...subscription,
-        action,
+      const payload: SubscriptionMutationPayload = {
+        ...subscriptionQuery.subscription,
+        action
       };
 
       if (action === "modify") {
@@ -216,8 +173,8 @@ export function ManageSubscription({
       }
 
       if (action === "extend") {
-        const monthsValue = Number.parseInt(extendMonths, 10);
-        if (Number.isNaN(monthsValue) || monthsValue <= 0) {
+        const monthsValue = parseInt(extendMonths, 10);
+        if (isNaN(monthsValue) || monthsValue <= 0) {
           toast.error("Enter a valid number of months.");
           return false;
         }
@@ -225,45 +182,30 @@ export function ManageSubscription({
       }
 
       if (action === "seats") {
-        const seatsValue = Number.parseInt(seats, 10);
-        if (Number.isNaN(seatsValue) || seatsValue <= 0) {
+        const seatsValue = parseInt(seats, 10);
+        if (isNaN(seatsValue) || seatsValue <= 0) {
           toast.error("Enter a valid number of seats.");
           return false;
         }
         payload.seats = seatsValue;
       }
 
-      if (action !== "modify" && action !== "seats" && subscription?.plan && !payload.plan) payload.plan = subscription.plan;
+      if (action !== "modify" && action !== "seats" && subscriptionQuery?.subscription?.plan && !payload.plan) payload.plan = subscriptionQuery.subscription.plan;
 
       setIsLoading(true);
       try {
-        const response = await fetch("/api/admin/subscription", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.json();
-          throw new Error(errorText.message || "Failed to update subscription.");
-        }
-
+        await subscriptionMutation.mutateAsync({...payload})
         toast.success("Subscription updated.");
         resetInteractiveState();
-        await fetchSubscription();
-        onSubscriptionUpdated?.();
+        subscriptionQuery.refetch()
         return true;
       } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "Failed to update subscription.",
-        );
+        toast.error(error instanceof Error ? error.message : "Failed to update subscription");
         return false;
       } finally {
         setIsLoading(false);
       }
-    },[disabled, extendMonths, fetchSubscription, onSubscriptionUpdated, resetInteractiveState, seats, selectedPlan, subscription, user,]
+    },[disabled, extendMonths, resetInteractiveState, seats, selectedPlan, subscriptionQuery.subscription, user,]
   );
 
   const handleSheetToggle = useCallback(
@@ -298,21 +240,21 @@ export function ManageSubscription({
         </SheetHeader>
 
         <div className="space-y-6 py-6">
-          {isLoading && !subscription ? (
+          {isLoading && !subscriptionQuery.subscription ? (
             <div className="flex items-center justify-center gap-2 py-20 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
               Loading subscription details...
             </div>
-          ) : subscription ? (
+          ) : subscriptionQuery.subscription ? (
             <>
               <div className="p-4 bg-muted/50 rounded-lg space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-xl font-semibold">
-                      {formatPlanName(subscription.plan)} Plan
+                      {formatPlanName(subscriptionQuery.subscription.plan)} Plan
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Subscription ID: {subscription.id}
+                      Subscription ID: {subscriptionQuery.subscription.id}
                     </p>
                   </div>
                   <Badge variant={statusInfo?.variant || "outline"}>
@@ -321,7 +263,7 @@ export function ManageSubscription({
                   </Badge>
                 </div>
 
-                {subscription.cancelAtPeriodEnd && (
+                {subscriptionQuery.subscription.cancelAtPeriodEnd && (
                   <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
                     <div className="flex items-center gap-2 text-destructive">
                       <AlertCircle className="h-4 w-4" />
@@ -344,38 +286,38 @@ export function ManageSubscription({
                     <div className="flex-1">
                       <p className="text-sm font-medium">Current Period</p>
                       <p className="text-sm text-muted-foreground">
-                        {formatDate(subscription.periodStart)} -{" "}
-                        {formatDate(subscription.periodEnd)}
+                        {formatDate(subscriptionQuery.subscription.periodStart)} -{" "}
+                        {formatDate(subscriptionQuery.subscription.periodEnd)}
                       </p>
                     </div>
                   </div>
 
-                  {subscription.trialStart && subscription.trialEnd && (
+                  {subscriptionQuery.subscription.trialStart && subscriptionQuery.subscription.trialEnd && (
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-muted-foreground" />
                       <div className="flex-1">
                         <p className="text-sm font-medium">Trial Period</p>
                         <p className="text-sm text-muted-foreground">
-                          {formatDate(subscription.trialStart)} -{" "}
-                          {formatDate(subscription.trialEnd)}
+                          {formatDate(subscriptionQuery.subscription.trialStart)} -{" "}
+                          {formatDate(subscriptionQuery.subscription.trialEnd)}
                         </p>
                       </div>
                     </div>
                   )}
 
-                  {subscription.seats !== undefined && (
+                  {subscriptionQuery.subscription.seats !== undefined && (
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-muted-foreground" />
                       <div className="flex-1">
                         <p className="text-sm font-medium">Seats</p>
                         <p className="text-sm text-muted-foreground">
-                          {subscription.seats} seat(s)
+                          {subscriptionQuery.subscription.seats} seat(s)
                         </p>
                       </div>
                     </div>
                   )}
 
-                  {subscription.stripeCustomerId && (
+                  {subscriptionQuery.subscription.stripeCustomerId && (
                     <div className="flex items-center gap-2">
                       <CreditCard className="h-4 w-4 text-muted-foreground" />
                       <div className="flex-1">
@@ -383,7 +325,7 @@ export function ManageSubscription({
                           Stripe Customer ID
                         </p>
                         <p className="text-sm text-muted-foreground font-mono text-xs">
-                          {subscription.stripeCustomerId}
+                          {subscriptionQuery.subscription.stripeCustomerId}
                         </p>
                       </div>
                     </div>
@@ -397,7 +339,7 @@ export function ManageSubscription({
                 </h4>
 
                 <div className="space-y-3">
-                  {otherPlans.length > 0 && subscription.status === "active" && (
+                  {otherPlans.length > 0 && subscriptionQuery.subscription.status === "active" && (
                     <div className="space-y-2">
                       <Button
                         variant="outline"
@@ -436,7 +378,7 @@ export function ManageSubscription({
                               size="sm"
                               onClick={() => {
                                 setActionType(null);
-                                setSelectedPlan(subscription.plan);
+                                setSelectedPlan(subscriptionQuery?.subscription?.plan ?? "");
                               }}
                             >
                               Cancel
@@ -451,7 +393,7 @@ export function ManageSubscription({
                               }}
                               disabled={
                                 !selectedPlan ||
-                                selectedPlan === subscription.plan ||
+                                selectedPlan === subscriptionQuery.subscription.plan ||
                                 isLoading
                               }
                             >
@@ -464,7 +406,7 @@ export function ManageSubscription({
                     </div>
                   )}
 
-                  {subscription.status === "active" && (
+                  {subscriptionQuery.subscription.status === "active" && (
                     <div className="space-y-2">
                       {actionType === "extend" ? (
                         <div className="space-y-2 p-3 border rounded-lg">
@@ -519,8 +461,8 @@ export function ManageSubscription({
                     </div>
                   )}
 
-                  {subscription.seats !== undefined &&
-                    subscription.status === "active" && (
+                  {subscriptionQuery.subscription.seats !== undefined &&
+                    subscriptionQuery.subscription.status === "active" && (
                       <div className="space-y-2">
                         {actionType === "seats" ? (
                           <div className="space-y-2 p-3 border rounded-lg">
@@ -540,7 +482,7 @@ export function ManageSubscription({
                                 onClick={() => {
                                   setActionType(null);
                                   setSeats(
-                                    subscription.seats?.toString() || "1",
+                                    subscriptionQuery?.subscription?.seats?.toString() || "1",
                                   );
                                 }}
                               >
@@ -557,7 +499,7 @@ export function ManageSubscription({
                                 disabled={
                                   !seats ||
                                   Number.parseInt(seats, 10) ===
-                                    subscription.seats ||
+                                    subscriptionQuery.subscription.seats ||
                                   isLoading
                                 }
                               >
@@ -580,7 +522,7 @@ export function ManageSubscription({
                       </div>
                     )}
 
-                  {subscription.status === "active" && (
+                  {subscriptionQuery.subscription.status === "active" && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -606,7 +548,7 @@ export function ManageSubscription({
                     </DropdownMenu>
                   )}
 
-                  {subscription.status === "canceled" && (
+                  {subscriptionQuery.subscription.status === "canceled" && (
                     <Button
                       variant="outline"
                       className="w-full justify-start"

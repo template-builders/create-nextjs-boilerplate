@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
                     
                 }, {idempotencyKey})
             }
-            return NextResponse.json({"message": "Successfully handled action"})
+            return NextResponse.json({message: "Successfully handled action", success: true})
         }
 
     } catch (e) {
