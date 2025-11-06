@@ -13,7 +13,7 @@ import { Calendar, Download, Settings, DollarSign, Shield, AlertCircle } from "l
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faStripeS } from "@fortawesome/free-brands-svg-icons"
 import { useRouter } from "next/navigation"
-import { authClient } from "@/lib/auth-client"
+import { authClient } from "@/lib/authentication/auth-client"
 import { toast } from "sonner"
 
 export const BillingDetails = ({data}: TabsComponentProps) => {
@@ -136,7 +136,7 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
                     </p>
                   </motion.div>
                   
-                  {/* <motion.div 
+                  <motion.div 
                     className="p-4 border rounded-lg border-border hover:bg-accent/5 transition-all duration-200"
                     whileHover={{ scale: 1.02 }}
                   >
@@ -147,7 +147,7 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
                     <p className="text-sm text-muted-foreground">
                       Subscription Active
                     </p>
-                  </motion.div> */}
+                  </motion.div>
                 </div>
               </div>
             ) : (
@@ -171,60 +171,64 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
         </Card>
       </motion.div>
 
-      <motion.div variants={itemVariants}>
-        <Card className="hover:shadow-lg transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FontAwesomeIcon icon={faStripeS} className="w-5 h-5 text-primary" />
-              Payment Information
-            </CardTitle>
-            <CardDescription>Manage your saved payment methods and billing information</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            
-            <Button 
-              variant="outline" className="w-full hover:bg-accent/50 transition-all duration-200"
-              disabled={subscription?.plan === "basic"}
-              onClick={handleManageInformationClick}
-            >
-              <FontAwesomeIcon icon={faStripeS} className="w-5 h-5 text-primary" />
-              Manage Billing Information
-            </Button>
-          </CardContent>
-        </Card>
-      </motion.div>
+      {subscription && (
+        <>
+          <motion.div variants={itemVariants}>
+            <Card className="hover:shadow-lg transition-all duration-300">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faStripeS} className="w-5 h-5 text-primary" />
+                  Payment Information
+                </CardTitle>
+                <CardDescription>Manage your saved payment methods and billing information</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                
+                <Button 
+                  variant="outline" className="w-full hover:bg-accent/50 transition-all duration-200"
+                  disabled={subscription?.plan === "basic"}
+                  onClick={handleManageInformationClick}
+                >
+                  <FontAwesomeIcon icon={faStripeS} className="w-5 h-5 text-primary" />
+                  Manage Billing Information
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-      <motion.div variants={itemVariants}>
-        <Card className="hover:shadow-lg transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-primary" />
-              Security & Privacy
-            </CardTitle>
-            <CardDescription>Manage your billing security and privacy settings</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Separator />
-            <motion.div 
-              className="flex items-center justify-between p-4 border rounded-lg border-border hover:bg-accent/5 transition-all duration-200"
-              whileHover={{ scale: 1.02 }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <AlertCircle className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">Billing Notifications</p>
-                  <p className="text-sm text-muted-foreground">Get notified about billing events and updates</p>
-                </div>
-              </div>
-              <Button variant="outline" size="sm" className="hover:bg-accent/50 transition-all duration-200">
-                Configure
-              </Button>
-            </motion.div>
-          </CardContent>
-        </Card>
-      </motion.div>
+          <motion.div variants={itemVariants}>
+            <Card className="hover:shadow-lg transition-all duration-300">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-primary" />
+                  Security & Privacy
+                </CardTitle>
+                <CardDescription>Manage your billing security and privacy settings</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Separator />
+                <motion.div 
+                  className="flex items-center justify-between p-4 border rounded-lg border-border hover:bg-accent/5 transition-all duration-200"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <AlertCircle className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Billing Notifications</p>
+                      <p className="text-sm text-muted-foreground">Get notified about billing events and updates</p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" className="hover:bg-accent/50 transition-all duration-200">
+                    Configure
+                  </Button>
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </>
+      )}
     </motion.div>
   )
 }

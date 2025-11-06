@@ -8,7 +8,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { useUserData } from "@/hooks/use-user-data"
-import { Home, User, Logs } from "lucide-react"
+import { Home, User } from "lucide-react"
 import { SidebarLinkProps } from "@/components/base-sidebar"
 import { ModeToggle } from "@/components/theme-provider"
 
@@ -18,7 +18,6 @@ const examples: SidebarLinkProps[] = [
     children: [
       {link: "/admin", icon: Home, title: "Home"},
       {link: "/admin/users", icon: User, title: "Users" },
-      {link: "/admin/reports", icon: Logs, title: "Reports" }
     ] 
   }
 ]
@@ -51,7 +50,7 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            {children}
+          {children}
         </div>
       </SidebarInset>
     </SidebarProvider>

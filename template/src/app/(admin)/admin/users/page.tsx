@@ -53,8 +53,9 @@ import {
 import { ManageInfo } from "./ManageInfo";
 import { ManageSubscription } from "./ManageSubscription";
 import { UserWithRole } from "better-auth/plugins";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/authentication/auth-client";
 import { toast } from "sonner";
+import { ApplicationRoles, rankApplicationRoles } from "@/lib/authentication/permissions";
 
 function getInitials(name: string): string {
   return name
@@ -95,10 +96,10 @@ export default function AdminUsersPage() {
   const listData = useListUsers()
 
   const {data} = authClient.useSession()
-  const currentUser = data?.user
+  const currentUser = data?.user 
 
-  const cantEditUser = (user: UserWithRole) => {
-    return (user.id === currentUser?.id || user.role === "admin" || (currentUser?.role === "moderator" && user.role === "moderator")) 
+  const blockManage = (user: UserWithRole) => {
+    return !rankApplicationRoles(currentUser?.role as ApplicationRoles, user.role as ApplicationRoles)
   }
 
   useEffect(() => {
@@ -122,7 +123,7 @@ export default function AdminUsersPage() {
         email: createUserData.email,
         password: createUserData.password,
         name: createUserData.name,
-        role: createUserData.role as "user" | "admin",
+        role: createUserData.role as ApplicationRoles,
         fetchOptions: {
           onSuccess: async () => {
             toast.success("Successfully created user")
@@ -207,14 +208,18 @@ export default function AdminUsersPage() {
                 </div>
                 <div className="flex flex-col gap-1">
                   <Label htmlFor="create-user-role">Role</Label>
-                  <Select defaultValue="user" onValueChange={(value) => setCreateUserData((prev) => ({...prev, role: value}))}>
+                  <Select
+                    value={createUserData.role}
+                    onValueChange={(value) => setCreateUserData((prev) => ({ ...prev, role: value }))}>
                     <SelectTrigger id="create-user-role" className="w-full">
-                      <SelectValue placeholder="Select Role" />
+                      <SelectValue defaultValue="user" placeholder="Select Role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="moderator">Moderator</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
+                      {rankApplicationRoles(currentUser?.role as ApplicationRoles).map((opt) => (
+                        <SelectItem key={opt.key} value={opt.key}>
+                          {opt.value}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -337,7 +342,7 @@ export default function AdminUsersPage() {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            disabled={cantEditUser(user)}
+                            disabled={blockManage(user)}
                           >
                             <Settings className="h-4 w-4 mr-1" />
                             Manage
@@ -367,6 +372,7 @@ export default function AdminUsersPage() {
                       </DropdownMenu>
                       <ManageInfo
                         user={user}
+                        currentUser={data?.user as UserWithRole}
                         open={infoUserId === user.id}
                         onOpenChange={(open) => {
                           if (open) {
@@ -376,7 +382,7 @@ export default function AdminUsersPage() {
                             setInfoUserId(null);
                           }
                         }}
-                        disabled={cantEditUser(user)}
+                        disabled={blockManage(user)}
                         hideTrigger={true}
                         onUserUpdated={() => {
                           listData.refetch();
@@ -393,11 +399,8 @@ export default function AdminUsersPage() {
                             setSubscriptionUserId(null);
                           }
                         }}
-                        disabled={cantEditUser(user)}
+                        disabled={blockManage(user)}
                         hideTrigger={true}
-                        onSubscriptionUpdated={() => {
-                          listData.refetch();
-                        }}
                       />
                     </TableCell>
                   </TableRow>

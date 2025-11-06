@@ -11,7 +11,7 @@ import { Form, FormField, FormControl, FormItem, FormMessage, FormLabel } from "
 import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { authClient } from "@/lib/auth-client"
+import { authClient } from "@/lib/authentication/auth-client"
 
 export function PasswordResetForm({token}: {token: string}) {
   const [loading, setLoading] = useState<boolean>(false)

@@ -44,9 +44,9 @@ import { UserWithRole } from "better-auth/plugins";
 import { Subscription } from "@better-auth/stripe";
 import { useGetSubscription } from "./queries/subscriptionQuery";
 import { SubscriptionMutationPayload, useUpdateSubscription } from "./mutations/subscriptionMutation";
+import { stripePlanNames } from "@/lib/stripe";
 
-export type ActionTypes = "modify" | "reactivate" | "seats" | "remove-cancellation";
-export type PlanTypes = "basic" | "plus" | "pro";
+export type ActionTypes = "modify" | "seats" | "remove-cancellation" | "set-cancellation";
 
 interface ManageSubscriptionProps {
   user: UserWithRole;
@@ -146,7 +146,7 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
 
   }, [open, resetInteractiveState]);
 
-  const availablePlans: PlanTypes[] = ["basic", "plus", "pro"];
+  const availablePlans = stripePlanNames
   const otherPlans = subscriptionQuery.subscription ? 
   availablePlans.filter((plan) => plan !== subscriptionQuery?.subscription?.plan) : availablePlans;
 
@@ -154,12 +154,13 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
   const StatusIcon = statusInfo?.icon || AlertCircle;
 
   const handleAction = useCallback(
-    async (action: ActionTypes): Promise<boolean> => {
+    async (action: ActionTypes, detail?: string): Promise<boolean> => {
       if (disabled || !subscriptionQuery.subscription) return false;
 
       const payload: SubscriptionMutationPayload = {
         ...subscriptionQuery.subscription,
-        action
+        action,
+        detail
       };
 
       if (action === "modify") {
@@ -182,9 +183,9 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
       setIsLoading(true);
       try {
         await subscriptionMutation.mutateAsync({...payload})
+        await subscriptionQuery.refetch()
         toast.success("Subscription updated.");
         resetInteractiveState();
-        subscriptionQuery.refetch()
         return true;
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Failed to update subscription");
@@ -413,9 +414,7 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
                                 size="sm"
                                 onClick={() => {
                                   setActionType(null);
-                                  setSeats(
-                                    subscriptionQuery?.subscription?.seats?.toString() || "1",
-                                  );
+                                  setSeats(subscriptionQuery?.subscription?.seats?.toString() || "1");
                                 }}
                               >
                                 Cancel
@@ -424,16 +423,9 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
                                 size="sm"
                                 onClick={async () => {
                                   const success = await handleAction("seats");
-                                  if (success) {
-                                    setActionType(null);
-                                  }
+                                  if (success) setActionType(null)
                                 }}
-                                disabled={
-                                  !seats ||
-                                  Number.parseInt(seats, 10) ===
-                                    subscriptionQuery.subscription.seats ||
-                                  isLoading
-                                }
+                                disabled={!seats || parseInt(seats, 10) === subscriptionQuery.subscription.seats || isLoading}
                               >
                                 <Users className="h-4 w-4 mr-1" />
                                 Update Seats
@@ -455,7 +447,7 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
                     )}
 
                   {(() => {
-                    if (subscriptionQuery.subscription.status === "active")
+                    if (subscriptionQuery.subscription.plan !== "basic")
                     return subscriptionQuery.subscription.cancelAtPeriodEnd ? (
                       <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/5">
                         <div className="flex items-start justify-between gap-3">
@@ -495,11 +487,11 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem disabled={isLoading}>
+                          <DropdownMenuItem disabled={isLoading} onClick={() => handleAction("set-cancellation", "cycle")}>
                             <Clock className="h-4 w-4 mr-2" />
                             Cancel at Period End
                           </DropdownMenuItem>
-                          <DropdownMenuItem disabled={isLoading}>
+                          <DropdownMenuItem disabled={isLoading} onClick={() => handleAction("set-cancellation", "now")}>
                             <XCircle className="h-4 w-4 mr-2" />
                             Cancel Immediately
                           </DropdownMenuItem>
@@ -507,18 +499,6 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
                       </DropdownMenu>
                     )
                   })()}
-
-                  {subscriptionQuery.subscription.status === "canceled" && (
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      disabled={isLoading}
-                      onClick={() => handleAction("reactivate")}
-                    >
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Reactivate Subscription
-                    </Button>
-                  )}
                 </div>
               </div>
             </>

@@ -23,7 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import {z} from "zod"
 import { useForm } from "react-hook-form"
 import { useState } from "react"
-import { authClient } from "@/lib/auth-client"
+import { authClient } from "@/lib/authentication/auth-client"
 import { toast } from "sonner"
 import { UserData } from "@/hooks/use-user-data"
 

@@ -39,7 +39,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { UserWithRole } from "better-auth/plugins";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/authentication/auth-client";
+import { ApplicationRoles, rankApplicationRoles } from "@/lib/authentication/permissions";
 
 function getInitials(name: string): string {
   return name
@@ -67,6 +68,7 @@ type ActionProps = "impersonate" | "toggle-ban" | "revoke-sessions" | "delete";
 
 interface ManageInfoProps {
   user: UserWithRole;
+  currentUser: UserWithRole
   open: boolean;
   onOpenChange: (open: boolean) => void;
   disabled?: boolean;
@@ -76,6 +78,7 @@ interface ManageInfoProps {
 
 export function ManageInfo({
   user,
+  currentUser,
   open,
   onOpenChange,
   disabled = false,
@@ -275,9 +278,11 @@ export function ManageInfo({
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="moderator">Moderator</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
+                      {rankApplicationRoles(currentUser?.role as ApplicationRoles).map((opt) => (
+                        <SelectItem key={opt.key} value={opt.key}>
+                          {opt.value}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 ) : (

@@ -5,7 +5,7 @@ import { faDiscord, faGoogle, faGithub } from "@fortawesome/free-brands-svg-icon
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { authClient } from "@/lib/auth-client"
+import { authClient } from "@/lib/authentication/auth-client"
 import { Loader2 } from "lucide-react"
 
 export const SocialSigninForm = () => {

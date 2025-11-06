@@ -18,7 +18,7 @@ import { toast } from "sonner"
 import { UserData } from "@/hooks/use-user-data"
 import { Loader2 } from "lucide-react"
 import { PasswordForm } from "./passwordForm"
-import { authClient } from "@/lib/auth-client"
+import { authClient } from "@/lib/authentication/auth-client"
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required" }).max(64),

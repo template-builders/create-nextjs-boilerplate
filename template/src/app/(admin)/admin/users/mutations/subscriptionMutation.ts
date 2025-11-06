@@ -4,6 +4,7 @@ import { Subscription } from "@better-auth/stripe";
 
 export type SubscriptionMutationPayload = Subscription & {
   action: ActionTypes
+  detail?: string
   months?: number
   seats?: number
 }

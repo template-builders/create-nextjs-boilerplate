@@ -101,10 +101,6 @@ export const subscription = pgTable("subscription", {
   seats: integer("seats"),
 });
 
-export const subscriptionUsageRelation = relations(usage, ({many}) => ({
-  usages: many(usage)
-}))
-
 export const passkey = pgTable("passkey", {
   id: text("id").primaryKey(),
   name: text("name"),

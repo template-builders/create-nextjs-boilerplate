@@ -1,10 +1,9 @@
 import Stripe from "stripe";
 import { db } from "@/db";
 import { usage } from "@/db/schemas/plan";
-import { eq } from "drizzle-orm";
-import { subscription } from "@/db/schemas/auth";
-import { addMonthsUTC, nowUTC } from "../cron/date";
-import { stripeClient } from "../auth";
+import { and, eq, inArray } from "drizzle-orm";
+import { stripeClient } from "../authentication/auth";
+import { cyclableMetrics } from ".";
 
 function hasCycled(prevSub: Partial<Stripe.Subscription>, currSub: Stripe.Subscription) {
     const prev = prevSub?.items?.data.sort((a, b) => a.id.localeCompare(b.id)) ?? []
@@ -18,7 +17,6 @@ function hasCycled(prevSub: Partial<Stripe.Subscription>, currSub: Stripe.Subscr
         if (a.id !== b.id || a.price.id !== b.price.id) return false
         if (a.current_period_end !== b.current_period_start || a.current_period_start === b.current_period_start) return false
     }   
-
     return true
 }
 
@@ -26,8 +24,7 @@ export async function stripeEventHandler(event: Stripe.Event) {
     const idempotencyKey = crypto.randomUUID()
     try {
         switch (event.type) {
-            case "customer.subscription.updated":
-                
+            case "customer.subscription.updated": {
                 const prevObject = event.data.previous_attributes
                 const currObject = event.data.object
 
@@ -43,52 +40,39 @@ export async function stripeEventHandler(event: Stripe.Event) {
                         return db.update(usage).set({
                             updatedAt: new Date(),
                             count: 0
-                        }).where(eq(usage.subscriptionId, subscriptionId))
+                        }).where(and(eq(usage.subscriptionId, subscriptionId), inArray(usage.metric, cyclableMetrics)))
                     }
                     await Promise.all(usageData.map((data) => updateUsage(data.subscriptionId)))
-                    console.log(`Reset usages for user: ${subscriptionData?.referenceId}`)
-
                 }
+                console.log(`Processed webhook: ${event.type}`)
                 break
-            case "customer.subscription.deleted":
-                const periodStart = nowUTC()
-                const periodEnd = addMonthsUTC(periodStart, 1)
-                await Promise.all([
-                    db.update(subscription).set({
-                        plan: "basic",
-                        status: "active",
-                        periodStart,
-                        stripeSubscriptionId: null,
-                        periodEnd
-                    }).where(eq(subscription.id, event.data.object.id)),
-                    db.update(usage).set({
-                        count: 0
-                    }).where (eq(usage.subscriptionId, event.data.object.id))
-                ])
-                break
-            case "checkout.session.completed":
+            }
+            case "checkout.session.completed": {
                 const checkoutObject = event.data.object
                 
                 if (checkoutObject.mode === "subscription" && checkoutObject.customer && checkoutObject.subscription) {
                     const currentSession = await stripeClient.checkout.sessions.retrieve(checkoutObject.id,  {
-                        expand: ["subscription.latest_invoice.confirmation_secret", "setup_intent"]
+                        expand: ["subscription.latest_invoice.confirmation_secret", "customer"]
                     }, {idempotencyKey})
+                    const customer = currentSession.customer as Stripe.Customer
 
-                    const subscription = currentSession.subscription as Stripe.Subscription
-                    const invoice = subscription.latest_invoice as Stripe.Invoice
-                    const clientSecret = invoice.confirmation_secret?.client_secret
-                    const paymentIntentId = clientSecret?.split("_secret_")[0]
+                    if (!customer.invoice_settings.default_payment_method) {
+                        const subscription = currentSession.subscription as Stripe.Subscription
+                        const invoice = subscription.latest_invoice as Stripe.Invoice
+                        const clientSecret = invoice.confirmation_secret?.client_secret
+                        const paymentIntentId = clientSecret?.split("_secret_")[0]
 
-                    if (paymentIntentId) {
-                        const paymentIntent = await stripeClient.paymentIntents.retrieve(paymentIntentId)
-                        await stripeClient.customers.update(checkoutObject.customer.toString(), {
-                            invoice_settings: {default_payment_method: paymentIntent.payment_method?.toString()}
-                        }, {idempotencyKey})
+                        if (paymentIntentId) {
+                            const paymentIntent = await stripeClient.paymentIntents.retrieve(paymentIntentId)
+                            await stripeClient.customers.update(checkoutObject.customer.toString(), {
+                                invoice_settings: {default_payment_method: paymentIntent.payment_method?.toString()}
+                            }, {idempotencyKey})
+                        }
                     }
                 }
-                console.log("Processed completed checkout session")
+                console.log(`Processed webhook: ${event.type}`)
                 break
-            case "invoice.paid":
+            }
             default:
                 console.log("Could not match webhook type: ", event.type)
                 break

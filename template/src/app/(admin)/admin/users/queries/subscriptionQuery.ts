@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { UserWithRole } from "better-auth/plugins";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/authentication/auth-client";
 
 export function useGetSubscription(user: UserWithRole) {
 

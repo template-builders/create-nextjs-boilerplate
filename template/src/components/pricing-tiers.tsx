@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Star, Check, ArrowRight } from "lucide-react"
 import { subscriptionFeatures } from "@/lib/stripe"
 import { toast } from "sonner"
-import { authClient } from "@/lib/auth-client"
+import { authClient } from "@/lib/authentication/auth-client"
 
 export function PricingTiersComponent({displayHeader = true}: {displayHeader?: boolean}) {
   const [isAnnual, setIsAnnual] = useState(false)

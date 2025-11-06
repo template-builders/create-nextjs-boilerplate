@@ -21,7 +21,7 @@ import {
   FormControl 
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client"
+import { authClient } from "@/lib/authentication/auth-client"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Loader } from "lucide-react"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/authentication/auth-client";
 import { useState, useCallback, useMemo } from "react";
 
 type SearchByType = "email" | "name" | undefined

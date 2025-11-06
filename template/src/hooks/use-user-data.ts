@@ -1,6 +1,6 @@
 "use client"
 
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "@/lib/authentication/auth-client";
 import { useQuery } from "@tanstack/react-query";
 import { Session } from "better-auth";
 
@@ -47,14 +47,13 @@ export function useUserData() {
   const query = useQuery({
     queryKey: ["user-data"],
     queryFn: async () => {
-      const [accounts, sessions, {data}, passkeys, subscriptionRes] = await Promise.all([
+      const [accounts, sessions, {data}, passkeys, subscription] = await Promise.all([
         authClient.listAccounts(),
         authClient.listSessions(),
         authClient.getSession(),
         authClient.passkey.listUserPasskeys(),
-        fetch("/api/subscription")
+        authClient.subscription.list()
       ]);
-      const subscription: SubscriptionType = await subscriptionRes.json()
       const activeSessions = sessions?.data?.map((session) => ({
         ...session, 
         current: session.id === data?.session.id,
@@ -66,7 +65,7 @@ export function useUserData() {
         sessions: activeSessions, 
         user: data?.user, 
         passkeys: passkeys.data, 
-        subscription: subscription ? subscription[0] : null
+        subscription: subscription ? subscription : null
       }
     },
     staleTime: 60_000,
