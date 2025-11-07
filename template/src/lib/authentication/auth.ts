@@ -1,15 +1,14 @@
-import { APIError, betterAuth } from "better-auth";
+import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP, twoFactor, phoneNumber, admin, apiKey, createAuthMiddleware } from "better-auth/plugins";
-import { stripe, Subscription } from "@better-auth/stripe"
+import { stripe } from "@better-auth/stripe"
 import { passkey } from "better-auth/plugins/passkey";
 import { db } from "@/db"; 
 import {schemaTables} from "@/db/schemas"
 import { verificationEmail, otpEmail, resetPassword } from "../resend/password";
 import { usageMetrics, stripePlans, cyclableMetrics } from "../stripe";
 import Stripe from "stripe";
-import { subscription } from "@/db/schemas/auth";
-import { usage } from "@/db/schemas/plan";
+import { usage } from "@/db/schemas/usage";
 import { stripeEventHandler } from "../stripe/event-handler";
 import { sendChangeEmail } from "../resend/change-email";
 import { addMonthsUTC, nowUTC } from "../cron/date";
@@ -42,6 +41,14 @@ export const auth = betterAuth({
                 await sendChangeEmail(data.newEmail, data.url)
             }
         }
+    },
+    hooks: {
+        before: createAuthMiddleware(async (ctx) => {
+        
+        }),
+        after: createAuthMiddleware(async (ctx) => {
+
+        })
     },
     databaseHooks: {
         user: {
@@ -80,9 +87,10 @@ export const auth = betterAuth({
     logger: {
 		disabled: false,
 		disableColors: false,
-		level: "error",
+		level: "info",
 		log: (level, message, ...args) => {
 			console.log(`[${level}] ${message}`, ...args);
+            console.log("testing")
 		}
 	},
     emailAndPassword: {

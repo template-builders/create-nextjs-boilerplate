@@ -5,16 +5,30 @@ import { useUserData } from "@/hooks/use-user-data"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Star, Check, ArrowRight } from "lucide-react"
+import { Star, Check, ArrowRight, ChevronDown } from "lucide-react"
 import { subscriptionFeatures } from "@/lib/stripe"
 import { toast } from "sonner"
 import { authClient } from "@/lib/authentication/auth-client"
+import { cn } from "@/lib/utils"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 
-export function PricingTiersComponent({displayHeader = true}: {displayHeader?: boolean}) {
+interface PricingTiersProps {
+  displayHeader?: boolean
+  animate?: boolean
+  layout?: "page" | "dialog"
+}
+
+export function PricingTiersComponent({displayHeader = true, animate = true, layout = "page"}: PricingTiersProps) {
   const [isAnnual, setIsAnnual] = useState(false)
+  const [expandedPlans, setExpandedPlans] = useState<Record<string, boolean>>({})
   const router = useRouter()
   const userData = useUserData()
   const pricingRef = useRef(null)
+  const isDialog = layout === "dialog"
   
   const pricingInView = useInView(pricingRef, { once: true, margin: "-100px" })
 
@@ -78,7 +92,7 @@ export function PricingTiersComponent({displayHeader = true}: {displayHeader?: b
 
   return (
     <div>
-      {displayHeader && 
+      {displayHeader && !isDialog && 
         <motion.section    
           className="pt-20 px-4 relative overflow-hidden"
           initial="hidden"
@@ -114,14 +128,28 @@ export function PricingTiersComponent({displayHeader = true}: {displayHeader?: b
 
       <motion.section 
         ref={pricingRef}
-        className="py-20 px-4"
-        initial="hidden"
-        animate={pricingInView ? "visible" : "hidden"}
+        className={cn("px-4", isDialog ? "py-8" : "py-20")}
+        initial={animate ? "hidden" : "visible"}
+        animate={
+          animate
+            ? pricingInView
+              ? "visible"
+              : "hidden"
+            : undefined
+        }
         variants={containerVariants}
       >
-        <div className="container mx-auto max-w-7xl">
+        <div
+          className={cn(
+            "mx-auto w-full",
+            isDialog ? "max-w-full" : "container max-w-7xl"
+          )}
+        >
           <motion.div 
-            className="flex flex-col items-center justify-center gap-4 mb-12 w-full"
+            className={cn(
+              "flex flex-col items-center justify-center gap-4 w-full",
+              isDialog ? "mb-8" : "mb-12"
+            )}
             variants={itemVariants}
           >
             <div className="flex items-center gap-4">
@@ -147,15 +175,31 @@ export function PricingTiersComponent({displayHeader = true}: {displayHeader?: b
             <div className="text-green-400 font-bold">Save 20% with annual billing!</div>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {subscriptionFeatures.map((plan, index) => (
+          <div
+            className={cn(
+              "grid",
+              isDialog ? "grid-cols-1 gap-4" : "md:grid-cols-3 gap-8"
+            )}
+          >
+            {subscriptionFeatures.map((plan, idx) => (
               <motion.div
-                key={plan.name}
+                key={`${plan.name}-${idx}`}
                 variants={cardVariants}
-                whileHover={{ y: -5 }}
+                whileHover={isDialog ? undefined : { y: -5 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
               >
-                <Card className={`relative h-full flex flex-col ${plan.popular ? 'border-primary shadow-lg scale-105' : 'border-border'}`}>
+                <Card
+                  className={cn(
+                    "relative flex h-full flex-col",
+                    plan.popular
+                      ? cn(
+                          "border-primary shadow-lg",
+                          !isDialog && "md:scale-105"
+                        )
+                      : "border-border",
+                    isDialog && "shadow-sm"
+                  )}
+                >
                   {plan.popular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <Badge className="bg-primary text-primary-foreground">
@@ -185,15 +229,74 @@ export function PricingTiersComponent({displayHeader = true}: {displayHeader?: b
                     </div>
                   </CardHeader>
                   
-                  <CardContent className="space-y-4 flex-grow">
-                    <ul className="space-y-3">
-                      {plan.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-start">
-                          <Check className="w-5 h-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-foreground">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
+                  <CardContent className="flex-grow space-y-4">
+                    {(() => {
+                      const visibleFeatures = isDialog
+                        ? plan.features.slice(0, 3)
+                        : plan.features
+                      const hiddenFeatures = isDialog
+                        ? plan.features.slice(3)
+                        : []
+                      const isExpanded = !!expandedPlans[plan.name]
+
+                      if (hiddenFeatures.length === 0) {
+                        return (
+                          <ul className="space-y-3">
+                            {plan.features.map((feature, featureIndex) => (
+                              <li key={featureIndex} className="flex items-start">
+                                <Check className="mr-3 mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                                <span className="text-sm text-foreground">{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )
+                      }
+
+                      return (
+                        <Collapsible
+                          open={isExpanded}
+                          onOpenChange={(open) =>
+                            setExpandedPlans((prev) => ({ ...prev, [plan.name]: open }))
+                          }
+                        >
+                          <ul className="space-y-3">
+                            {visibleFeatures.map((feature, featureIndex) => (
+                              <li key={`visible-${featureIndex}`} className="flex items-start">
+                                <Check className="mr-3 mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                                <span className="text-sm text-foreground">{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          <CollapsibleContent asChild>
+                            <ul className="mt-3 space-y-3">
+                              {hiddenFeatures.map((feature, hiddenIndex) => (
+                                <li key={`hidden-${hiddenIndex}`} className="flex items-start">
+                                  <Check className="mr-3 mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                                  <span className="text-sm text-foreground">{feature}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </CollapsibleContent>
+                          <CollapsibleTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="mt-4 w-full gap-2 text-muted-foreground"
+                            >
+                              {isExpanded
+                                ? "Show fewer features"
+                                : `Show ${hiddenFeatures.length} more`}
+                              <ChevronDown
+                                className={cn(
+                                  "h-4 w-4 transition-transform",
+                                  isExpanded && "rotate-180"
+                                )}
+                              />
+                            </Button>
+                          </CollapsibleTrigger>
+                        </Collapsible>
+                      )
+                    })()}
                   </CardContent>
                   <CardFooter className="mt-auto">
                     <Button 

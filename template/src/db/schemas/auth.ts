@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import {
   pgTable,
   text,
@@ -6,7 +5,6 @@ import {
   boolean,
   integer,
 } from "drizzle-orm/pg-core";
-import { usage } from "./plan";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),

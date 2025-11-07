@@ -3,7 +3,7 @@ import { auth } from "@/lib/authentication/auth";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { nowUTC, addMonthsUTC } from "@/lib/cron/date";
-import { usage } from "@/db/schemas/plan";
+import { usage } from "@/db/schemas/usage";
 import { cyclableMetrics } from "@/lib/stripe";
 import { inArray, sql } from "drizzle-orm";
 

@@ -197,10 +197,10 @@ export const MainDetails = ({data}: TabsComponentProps) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
-                    {getDeviceIcon(session.type)}
+                    {getDeviceIcon(session.device)}
                   </div>
                   <div>
-                    <p className="font-medium">{session.type}, {session.browser}</p>
+                    <p className="font-medium">{session.device} • {session.browser} • {session.system}</p>
                     <p className="text-sm text-muted-foreground">{session.current ? "Current Session" : formatTimeElapsed(session.createdAt)}</p>
                   </div>
                 </div>

@@ -54,7 +54,6 @@ export function rankApplicationRoles(currentRole: ApplicationRoles, targetRole?:
         const res = rolesArray.filter((obj) => rankMap[obj] < rankMap[currentRole])
         .map((obj) => ({key: obj, value: obj.charAt(0).toLocaleUpperCase() + obj.slice(1).toLocaleLowerCase()}))
         .sort((a, b) => rankMap[a.key] - rankMap[b.key])
-        console.log(res)
         return res
     }
 }

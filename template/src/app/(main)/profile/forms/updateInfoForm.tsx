@@ -66,6 +66,7 @@ export function UpdateInformationForm({ data }: { data: UserData }) {
           }
         }
       })
+      setEditMode(false)
       
       if (values.email && values.email !== data?.user?.email) {
         await authClient.changeEmail({

@@ -1,6 +1,6 @@
 "use client"
 
-import { useUserUsages } from "./queries/use-get-usages"
+import { useUserUsages } from "../../../hooks/use-get-usages"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -19,6 +19,7 @@ import {
   FileText,
   Users
 } from "lucide-react"
+import { authClient } from "@/lib/authentication/auth-client"
 
 const getMetricIcon = (metric: string) => {
   const iconMap: Record<string, any> = {
@@ -36,18 +37,7 @@ const getMetricIcon = (metric: string) => {
 }
 
 const getMetricName = (metric: string) => {
-  const nameMap: Record<string, string> = {
-    "api_calls": "API Calls",
-    "file_uploads": "File Uploads",
-    "email_sends": "Email Sends",
-    "database_queries": "Database Queries",
-    "search_requests": "Search Requests",
-    "document_views": "Document Views",
-    "user_invites": "User Invites",
-    "storage_usage": "Storage Usage",
-    "bandwidth_usage": "Bandwidth Usage"
-  }
-  return nameMap[metric] || metric.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  return metric.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
 }
 
 const formatCount = (count: number, metric: string) => {
@@ -65,7 +55,8 @@ const formatCount = (count: number, metric: string) => {
 }
 
 export default function Page() {
-  const userUsages = useUserUsages()
+  const {data} = authClient.useSession()
+  const userUsages = useUserUsages(data?.user)
   
   if (userUsages.isLoading) {
     return (
@@ -111,7 +102,7 @@ export default function Page() {
     )
   }
 
-  const usages = userUsages.data
+  const usages = userUsages.usages!
 
   return (
     <div className="space-y-6 mx-4">

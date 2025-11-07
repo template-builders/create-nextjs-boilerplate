@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { db } from "@/db";
-import { usage } from "@/db/schemas/plan";
+import { usage } from "@/db/schemas/usage";
 import { and, eq, inArray } from "drizzle-orm";
 import { stripeClient } from "../authentication/auth";
 import { cyclableMetrics } from ".";

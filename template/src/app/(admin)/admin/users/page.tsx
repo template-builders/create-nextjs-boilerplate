@@ -48,10 +48,12 @@ import {
   Settings,
   User,
   CreditCard,
-  ChevronDown
+  ChevronDown,
+  BarChart3
 } from "lucide-react";
 import { ManageInfo } from "./ManageInfo";
 import { ManageSubscription } from "./ManageSubscription";
+import { ManageUsage } from "./ManageUsage";
 import { UserWithRole } from "better-auth/plugins";
 import { authClient } from "@/lib/authentication/auth-client";
 import { toast } from "sonner";
@@ -87,6 +89,7 @@ export default function AdminUsersPage() {
   const [subscriptionUserId, setSubscriptionUserId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false)
   const [createUserLoading, setCreateUserLoading] = useState(false);
+  const [usageUserId, setUsageUserId] = useState<string | null>(null);
   const [createUserData, setCreateUserData] = useState({
     email: '',
     password : '',
@@ -368,6 +371,16 @@ export default function AdminUsersPage() {
                             <CreditCard className="h-4 w-4 mr-2" />
                             Manage Subscription
                           </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setInfoUserId(null);
+                              setSubscriptionUserId(null);
+                              setUsageUserId(user.id);
+                            }}
+                          >
+                            <BarChart3 className="h-4 w-4 mr-2" />
+                            Manage Usage
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <ManageInfo
@@ -397,6 +410,21 @@ export default function AdminUsersPage() {
                             setInfoUserId(null);
                           } else if (subscriptionUserId === user.id) {
                             setSubscriptionUserId(null);
+                          }
+                        }}
+                        disabled={blockManage(user)}
+                        hideTrigger={true}
+                      />
+                      <ManageUsage
+                        user={user}
+                        open={usageUserId === user.id}
+                        onOpenChange={(open) => {
+                          if (open) {
+                            setUsageUserId(user.id);
+                            setInfoUserId(null);
+                            setSubscriptionUserId(null);
+                          } else if (usageUserId === user.id) {
+                            setUsageUserId(null);
                           }
                         }}
                         disabled={blockManage(user)}

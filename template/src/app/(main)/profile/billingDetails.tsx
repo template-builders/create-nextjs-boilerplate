@@ -1,30 +1,24 @@
 
 "use client"
 
-import { Subscription } from "@better-auth/stripe"
-import { useEffect, useState } from "react"
 import { TabsComponentProps } from "./page"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
-import { Calendar, Download, Settings, DollarSign, Shield, AlertCircle } from "lucide-react"
+import { Calendar, DollarSign, Shield, AlertCircle } from "lucide-react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faStripeS } from "@fortawesome/free-brands-svg-icons"
 import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/authentication/auth-client"
 import { toast } from "sonner"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { PricingTiersComponent } from "@/components/pricing-tiers"
 
 export const BillingDetails = ({data}: TabsComponentProps) => {
-  const [subscription, setSubscription] = useState<Subscription | null>(null)
   const router = useRouter()
-  
-  useEffect(() => {
-    if (data.subscription) {
-      setSubscription(data.subscription)
-    }
-  }, [data.subscription])
+  const subscription = data.subscription
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -114,7 +108,7 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
                   <div>
                     <h3 className="font-semibold text-lg">{formatName(subscription.plan)} Plan</h3>
                     <p className="text-muted-foreground">
-                      Plan ID: {subscription.referenceId}
+                      Plan ID: {subscription.plan}
                     </p>
                   </div>
                   <Badge variant={getSubscriptionStatus(subscription.status || 'active').variant}>
@@ -162,9 +156,16 @@ export const BillingDetails = ({data}: TabsComponentProps) => {
                 <p className="text-muted-foreground mb-4">
                   You don't have an active subscription. Choose a plan to get started.
                 </p>
-                <Button className="hover:bg-primary/90 transition-all duration-200">
-                  View Plans
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="hover:bg-primary/90 transition-all duration-200">
+                      View Plans
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="min-w-[600px] no-scrollbar">
+                    <PricingTiersComponent layout="dialog" displayHeader={false} animate={false}/>
+                  </DialogContent>
+                </Dialog>
               </motion.div>
             )}
           </CardContent>

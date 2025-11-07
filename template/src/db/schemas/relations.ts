@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import { user } from "./auth";
-import { usage } from "./plan";
+import { usage } from "./usage";
 
 export const userRelations = relations(user, ({ many }) => ({
     usage: many(usage)

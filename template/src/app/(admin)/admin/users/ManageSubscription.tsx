@@ -216,7 +216,7 @@ export function ManageSubscription({ user, open, onOpenChange, disabled = false,
           </Button>
         </SheetTrigger>
       )}
-      <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto px-3">
+      <SheetContent className="flex flex-col gap-6 overflow-y-scroll no-scrollbar py-4 px-4 min-w-[500px]">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
