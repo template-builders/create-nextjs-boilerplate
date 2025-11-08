@@ -1,7 +1,7 @@
 "use client"
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faDiscord, faGoogle, faGithub } from "@fortawesome/free-brands-svg-icons"
+import { faDiscord, faGoogle, faGithub, faMicrosoft } from "@fortawesome/free-brands-svg-icons"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
@@ -11,7 +11,8 @@ import { Loader2 } from "lucide-react"
 export const SocialSignupForm = () => {
   const [loading, setLoading] = useState<boolean>(false)
   const [selected, setSelected] = useState<string>("")
-  const signupWithSocial = async (provider: "google" | "github" | "discord") => {
+
+  const signupWithSocial = async (provider: string, display: string) => {
     setLoading(true)
     setSelected(provider)
     setTimeout(() => {
@@ -21,7 +22,7 @@ export const SocialSignupForm = () => {
       provider,
       fetchOptions: {
         onSuccess: (ctx) => {
-          toast.success(`Attempting to sign up with ${provider}`)
+          toast.success(`Attempting to sign up with ${display}`)
         },
         onError: (ctx) => {
           toast.error(ctx.error.message)
@@ -32,50 +33,31 @@ export const SocialSignupForm = () => {
     setLoading(false)
   }
 
+  const socialsList = [
+    {provider: "Google", value: "google", icon: faGoogle},
+    {provider: "Github", value: "github", icon: faGithub},
+    {provider: "Discord", value: "discord", icon: faDiscord},
+    {provider: "Microsoft", value: "microsoft", icon: faMicrosoft}
+  ]
+
   return (
     <div className="flex gap-4 pb-4 w-full justify-center flex-wrap">
-      <Button 
-        className={`flex gap-4 w-[150px] ${loading ? "bg-muted cursor-not-allowed hover:bg-muted" : ""}`} 
-        onClick={() => signupWithSocial("google")}
-        disabled={loading}
-      >
-        {selected === "google" ?
-          <Loader2 className="animate-spin text-primary"/>
-          :
-          <>
-            <FontAwesomeIcon icon={faGoogle}size="xl" />
-            <div className="text-muted">Google</div>
-          </>
-        }
-      </Button>
-      <Button 
-        className={`flex gap-4 w-[150px] ${loading ? "bg-muted cursor-not-allowed hover:bg-muted" : ""}`} 
-        onClick={() => signupWithSocial("github")}
-        disabled={loading}
-      >
-        {selected === "github" ?
-          <Loader2 className="animate-spin text-primary"/>
-          :
-          <>
-            <FontAwesomeIcon icon={faGithub}size="xl" />
-            <div className="text-muted">GitHub</div>
-          </>
-        }
-      </Button>
-      <Button 
-        className={`flex gap-4 w-[150px] ${loading ? "bg-muted cursor-not-allowed hover:bg-muted" : ""}`} 
-        onClick={() => signupWithSocial("discord")}
-        disabled={loading}
-      >
-        {selected === "discord" ?
-          <Loader2 className="animate-spin text-primary"/>
-          :
-          <>
-            <FontAwesomeIcon icon={faDiscord}size="xl" />
-            <div className="text-muted">Discord</div>
-          </>
-        }
-      </Button>
+      {socialsList.map((social) => (
+        <Button 
+          className={`flex gap-4 w-[150px] ${loading ? "bg-muted cursor-not-allowed hover:bg-muted" : ""}`} 
+          onClick={() => signupWithSocial(social.value, social.provider)}
+          disabled={loading}
+        >
+          {selected === social.value ?
+            <Loader2 className="animate-spin text-primary"/>
+            :
+            <>
+              <FontAwesomeIcon icon={social.icon}size="xl" />
+              <div className="text-muted">{social.provider}</div>
+            </>
+          }
+        </Button>
+      ))}
     </div>
     
   )

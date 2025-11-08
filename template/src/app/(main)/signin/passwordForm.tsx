@@ -30,24 +30,37 @@ export const PasswordSignInForm = () => {
     }
   })
 
-  useEffect(() => {
-    if (!PublicKeyCredential.isConditionalMediationAvailable ||
-        !PublicKeyCredential.isConditionalMediationAvailable()) {
-      return;
-    }
-    void authClient.signIn.passkey({ 
-      autoFill: true,
-      fetchOptions: {
-        onSuccess: () => {
-          toast.success("Successfully logged in")
-          router.push("/")
-        },
-        onError: () => {
-          toast.error("Failed to log in with passkey")
+useEffect(() => {
+  let cancelled = false
+
+  const run = async () => {
+      if (
+        !("isConditionalMediationAvailable" in PublicKeyCredential) ||
+        !(await PublicKeyCredential.isConditionalMediationAvailable())
+      ) return
+
+      if (cancelled) return
+
+      await authClient.signIn.passkey({
+        autoFill: true,
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success("Successfully logged in")
+            router.push("/")
+          },
+          onError: () => {
+            toast.error("Failed to log in with passkey")
+          }
         }
-      } 
-    })
-  }, [])
+      })
+    }
+
+    void run()
+
+    return () => {
+      cancelled = true
+    }
+  }, [router])
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setLoading(true)

@@ -1,7 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { 
   AlertDialog, 
@@ -15,7 +13,7 @@ import {
   AlertDialogTrigger 
 } from "@/components/ui/alert-dialog"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faDiscord, faGithub, faGoogle } from "@fortawesome/free-brands-svg-icons"
+import { faDiscord, faGithub, faGoogle, faMicrosoft } from "@fortawesome/free-brands-svg-icons"
 import { PasskeyForm } from "./forms/passkeyForm"
 import { UpdateInformationForm } from "./forms/updateInfoForm"
 import { authClient } from "@/lib/authentication/auth-client"
@@ -44,7 +42,8 @@ export const MainDetails = ({data}: TabsComponentProps) => {
   const socialsList = [
     {provider: "Google", icon: faGoogle, connected: providerList.includes("google")},
     {provider: "Github", icon: faGithub, connected: providerList.includes("github")},
-    {provider: "Discord", icon: faDiscord, connected: providerList.includes("discord")}
+    {provider: "Discord", icon: faDiscord, connected: providerList.includes("discord")},
+    {provider: "Microsoft", icon: faMicrosoft, connected: providerList.includes("microsoft")}
   ]
 
   async function revokeActiveSession(token: string) {

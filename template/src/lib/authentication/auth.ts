@@ -14,6 +14,8 @@ import { sendChangeEmail } from "../resend/change-email";
 import { addMonthsUTC, nowUTC } from "../cron/date";
 import { accessControl, moderatorRole, userRole, adminRole, ownerRole } from "./permissions"
 import { and, eq, inArray } from "drizzle-orm";
+import { toTitle } from "@/utils/format";
+import { createBetterAuthAudit, createRequestAudit, createStripeEventAudit } from "../logger";
 
 export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2025-08-27.basil",
@@ -24,15 +26,22 @@ export const auth = betterAuth({
     account: {
         accountLinking: {
             enabled: true
-        }
+        },
+
     },
     user: {
         deleteUser: {
             enabled: true,
-            beforeDelete: async (auth) => {
+            beforeDelete: async (auth, request) => {
                 const userData = await db.query.user.findFirst({where: (user, {eq}) => eq(user.id, auth.id)})
                 await stripeClient.customers.del(userData!.stripeCustomerId as string)
-                console.log("Successfully deleted stripe data")
+
+                if (request) {
+                    const event = "User deleted"
+                    const detail = "User information deleted"
+                    const description = "User deleted in from database"
+                    createRequestAudit(request, {event, detail, description, status: "SUCCESS"}, auth.id)
+                }
             }
         },
         changeEmail: {
@@ -42,18 +51,19 @@ export const auth = betterAuth({
             }
         }
     },
-    hooks: {
-        before: createAuthMiddleware(async (ctx) => {
-        
-        }),
-        after: createAuthMiddleware(async (ctx) => {
-
-        })
-    },
     databaseHooks: {
         user: {
             create: {
                 after: async (user, ctx) => {
+
+                    if (ctx) {
+                        const basePath = new URL(ctx.request?.url ?? "").pathname
+                        const provider = basePath?.includes("callback") ? toTitle(basePath.substring(basePath.lastIndexOf("/") + 1)) : "Email/Password"
+                        const event = "User created"
+                        const detail = `User created via ${provider}`
+                        const description = "New user added to database"
+                        createBetterAuthAudit(ctx, {event, detail, description, status: "SUCCESS"}, user.id)
+                    }
                     const periodStart = nowUTC()
                     const periodEnd = addMonthsUTC(periodStart, 1)
 
@@ -71,6 +81,60 @@ export const auth = betterAuth({
                         ...usageMetrics.map((metric) => createUsage(metric)) 
                     ])
                 },
+            },
+            update: {
+                after: async (user, ctx) => {
+                    if (ctx) {
+                        const event = "User updated"
+                        const detail = "User information updated"
+                        const description = "User updated in database"
+                        createBetterAuthAudit(ctx, {event, detail, description, status: "SUCCESS"}, user.id)
+                    }
+                }
+            }
+        },
+        account: {
+            create: {
+                after: async(account, ctx) => {
+                    if (ctx) {
+                        const event = "Account created"
+                        const detail = "Account information linked"
+                        const description = "Account added in database"
+                        createBetterAuthAudit(ctx, {event, detail, description, status: "SUCCESS"}, account.userId)
+                    }
+                }
+            },
+            update: {
+                after: async(account, ctx) => {
+                    if (ctx) {
+                        const event = "Account updated"
+                        const detail = "Account information updated"
+                        const description = "Account updated in database"
+                        createBetterAuthAudit(ctx, {event, detail, description, status: "SUCCESS"}, account.userId)
+                    }
+                }
+            }
+        },
+        session: {
+            create: {
+                after: async(session, ctx) => {
+                    if (ctx) {
+                        const event = "Session created"
+                        const detail = "New session initialized"
+                        const description = "New session added in database"
+                        createBetterAuthAudit(ctx, {event, detail, description, status: "SUCCESS"}, session.userId)
+                    }
+                }
+            },
+            update: {
+                after: async(session, ctx) => {
+                    if (ctx) {
+                        const event = "Session updated"
+                        const detail = "Session has updated"
+                        const description = "Session updated in database"
+                        createBetterAuthAudit(ctx, {event, detail, description, status: "SUCCESS"}, session.userId)
+                    }
+                }
             }
         }
     },
@@ -87,7 +151,7 @@ export const auth = betterAuth({
     logger: {
 		disabled: false,
 		disableColors: false,
-		level: "info",
+		level: "debug",
 		log: (level, message, ...args) => {
 			console.log(`[${level}] ${message}`, ...args);
             console.log("testing")
@@ -124,6 +188,10 @@ export const auth = betterAuth({
             clientId: process.env.DISCORD_CLIENT_ID!,
             clientSecret: process.env.DISCORD_CLIENT_SECRET!
         },
+        microsoft: {
+            clientId: process.env.MICROSOFT_CLIENT_ID!,
+            clientSecret: process.env.MICROSOFT_CLIENT_SECRET!
+        }
     },
     plugins: [
         admin({

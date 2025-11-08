@@ -1,44 +1,10 @@
 "use client"
 
 import { authClient } from "@/lib/authentication/auth-client";
+import { getSessionInfo } from "@/utils/format";
 import { useQuery } from "@tanstack/react-query";
-import { Session } from "better-auth";
-
-type DeviceType = "Phone" | "Tablet" | "Desktop" | "Unknown";
-type BrowserType = "Chrome" | "Safari" | "Firefox" | "Edge" | "Opera" | "Brave" | "Chromium" | "Unknown";
-type SystemType = "Windows" | "macOS" | "Linux" | "Android" | "iOS" | "Unknown"
-
 
 export function useUserData() {
-  function getDeviceType(session: Session): DeviceType {
-    const ua = session.userAgent?.toLowerCase() ?? "";
-    if (/iphone|android.*mobile|windows phone/.test(ua)) return "Phone";
-    if (/ipad|android(?!.*mobile)|tablet|kindle|silk/.test(ua)) return "Tablet";
-    if (/windows nt|macintosh|x11|linux/i.test(ua)) return "Desktop";
-    return "Unknown";
-  }
-  function getSystemType(session: Session): SystemType {
-    const ua = session.userAgent?.toLowerCase() ?? "";
-
-    if (ua.includes("windows")) return "Windows";
-    if (ua.includes("iphone") || ua.includes("ipad") || ua.includes("ipod")) return "iOS";
-    if (ua.includes("macintosh")) return "macOS";
-    if (ua.includes("android")) return "Android";
-    if (ua.includes("linux")) return "Linux";
-    
-    return "Unknown";
-  }
-  function getBrowserType(session: Session): BrowserType {
-    const ua = session.userAgent?.toLowerCase() ?? "";
-    if (ua.includes("edg/") || ua.includes("edga/")) return "Edge";
-    if (ua.includes("opr/") || ua.includes("opera")) return "Opera";
-    if (ua.includes("firefox/")) return "Firefox";
-    if (ua.includes("chromium/")) return "Chromium";
-    if (ua.includes("chrome/") && !ua.includes("edg/") && !ua.includes("opr/")) return "Chrome";
-    if (ua.includes("safari/") && !ua.includes("chrome/") && !ua.includes("chromium/")) return "Safari";
-    
-    return "Unknown";
-  }
   const query = useQuery({
     queryKey: ["user-data"],
     queryFn: async () => {
@@ -52,9 +18,7 @@ export function useUserData() {
       const activeSessions = sessions?.data?.map((session) => ({
         ...session, 
         current: session.id === user?.data?.session.id,
-        device: getDeviceType(session),
-        browser: getBrowserType(session),
-        system: getSystemType(session)
+        ...getSessionInfo(session.userAgent)
       }))
       return {
         accounts: accounts, 

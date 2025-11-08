@@ -8,7 +8,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { useUserData } from "@/hooks/use-user-data"
-import { Home, User } from "lucide-react"
+import { Home, Logs, User } from "lucide-react"
 import { SidebarLinkProps } from "@/components/base-sidebar"
 import { ModeToggle } from "@/components/theme-provider"
 
@@ -18,6 +18,7 @@ const examples: SidebarLinkProps[] = [
     children: [
       {link: "/admin", icon: Home, title: "Home"},
       {link: "/admin/users", icon: User, title: "Users" },
+      {link: "/admin/audits", icon: Logs, title: "Audits"}
     ] 
   }
 ]
