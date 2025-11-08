@@ -8,13 +8,12 @@ export function useListAuditLogs(initialPage: number = 1, initialPageSize: numbe
     const [search, setSearch] = useState<string>(initialSearch)
 
     const query = useQuery({
-        queryKey: ["admin-audit-logs", {currentPage, pageSize}],
+        queryKey: ["admin-audit-logs", {currentPage, pageSize, search}],
         queryFn: async () => {
             const url = new URL("/api/admin/audit", process.env.NEXT_PUBLIC_BASE_URL)
             url.searchParams.set("offset", ((currentPage - 1) * pageSize).toString())
             url.searchParams.set("limit", pageSize.toString())
             url.searchParams.set("search", search)
-            console.log(url)
             const res = await fetch(url)
             const body: AuditLogGetResponse = await res.json()
             

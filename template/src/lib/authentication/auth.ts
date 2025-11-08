@@ -25,7 +25,8 @@ export const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export const auth = betterAuth({
     account: {
         accountLinking: {
-            enabled: true
+            enabled: true,
+            trustedProviders: ["github", "google", "microsoft", "discord"]
         },
 
     },
@@ -48,6 +49,12 @@ export const auth = betterAuth({
             enabled: true,
             sendChangeEmailVerification: async (data, request) => {
                 await sendChangeEmail(data.newEmail, data.url)
+                if (request) {
+                    const event = "Email change request"
+                    const detail = `Email change request from ${data.user.email} to ${data.newEmail}`
+                    const description = "Email change requested from user"
+                    createRequestAudit(request, {event, detail, description, status: "SUCCESS"}, data.user.id)
+                }
             }
         }
     },
@@ -138,6 +145,11 @@ export const auth = betterAuth({
             }
         }
     },
+    hooks: {
+        before: createAuthMiddleware(async (ctx) => {
+            console.log(ctx.path)
+        })
+    },
     trustedOrigins: [`${process.env.BETTER_AUTH_URL}`],
     database: drizzleAdapter(db, {
         provider: "pg",
@@ -151,10 +163,9 @@ export const auth = betterAuth({
     logger: {
 		disabled: false,
 		disableColors: false,
-		level: "debug",
+		level: "info",
 		log: (level, message, ...args) => {
 			console.log(`[${level}] ${message}`, ...args);
-            console.log("testing")
 		}
 	},
     emailAndPassword: {
@@ -162,18 +173,43 @@ export const auth = betterAuth({
         requireEmailVerification: true,
         sendResetPassword: async ({user, url, token}, request) => {
             await resetPassword(user.email, url)
+            if (request) {
+                const event = "Reset password request"
+                const detail = `Password reset request created`
+                const description = "Password reset created for user"
+                createRequestAudit(request, {event, detail, description, status: "SUCCESS"}, user.id)
+            }
         },
         onPasswordReset: async ({ user }, request) => {
-            console.log(`Password for user ${user.email} has been reset.`);
+            if (request) {
+                const event = "Password reset"
+                const detail = `Password reset finalized`
+                const description = "Password reset for user"
+                createRequestAudit(request, {event, detail, description, status: "SUCCESS"}, user.id)
+            }
         }
     },
     emailVerification: {
       sendVerificationEmail: async ({user, url, token}, request) => {
         await verificationEmail(user, url)
+            if (request) {
+                const event = "Email verification sent"
+                const detail = `Email verification request from user`
+                const description = "Email verification sent to user"
+                createRequestAudit(request, {event, detail, description, status: "SUCCESS"}, user.id)
+            }
       },
       sendOnSignIn: true,
       sendOnSignUp: true,
-      autoSignInAfterVerification: true
+      autoSignInAfterVerification: true,
+      onEmailVerification: async (user, request) => {
+            if (request) {
+                const event = "Email verified"
+                const detail = `Email verified for user`
+                const description = "Email successfully verified"
+                createRequestAudit(request, {event, detail, description, status: "SUCCESS"}, user.id)
+            }
+      }
     },
     socialProviders: {
         github: {
@@ -207,15 +243,27 @@ export const auth = betterAuth({
         emailOTP({
             otpLength: 8,
             expiresIn: 300,
-            async sendVerificationOTP({email, otp, type}) {
+            async sendVerificationOTP({email, otp, type}, request) {
                 await otpEmail(email, otp)
-            },
+                if (request) {
+                    const event = "OTP verification sent"
+                    const detail = `OTP verification sent to user`
+                    const description = "OTP email sent to user"
+                    createRequestAudit(request, {event, detail, description, status: "SUCCESS"}, email)
+                }
+            }
         }),
         twoFactor({
             otpOptions: {
                 digits: 8,
                 async sendOTP ({user, otp}, request) {
                     await otpEmail(user.email, otp)
+                    if (request) {
+                        const event = "OTP sent"
+                        const detail = `OTP sent to user`
+                        const description = "OTP email sent to user"
+                        createRequestAudit(request, {event, detail, description, status: "SUCCESS"}, user.id)
+                    }
                 },
             }
         }),
@@ -228,10 +276,22 @@ export const auth = betterAuth({
                 enabled: true,
                 plans: stripePlans,
                 onSubscriptionCancel: async ({event, subscription, stripeSubscription, cancellationDetails}) => {
+                    if (event) {
+                        const eventName = "Subscription canceled"
+                        const detail = `Stripe subscription canceled`
+                        const description = "Stripe subscription scheduled for cancelation"
+                        createStripeEventAudit(event, {event: eventName, detail, description, status: "SUCCESS"}, subscription.referenceId)
+                    }
                 },
                 onSubscriptionDeleted: async ({event, stripeSubscription, subscription: currentSubscription}) => {
                     const periodStart = nowUTC()
                     const periodEnd = addMonthsUTC(periodStart, 1)
+                    if (event) {
+                        const eventName = "Subscription deleted"
+                        const detail = `Stripe subscription deleted`
+                        const description = "Stripe subscription deleted from user"
+                        createStripeEventAudit(event, {event: eventName, detail, description, status: "SUCCESS"}, currentSubscription.referenceId)
+                    }
 
                     await Promise.all([
                         db.update(usage).set({
@@ -242,10 +302,20 @@ export const auth = betterAuth({
                     ])
                 },
                 onSubscriptionComplete: async ({event, subscription, stripeSubscription, plan}) => {
-
+                    if (event) {
+                        const eventName = "Subscription created"
+                        const detail = `Stripe subscription created with ${plan.name} plan`
+                        const description = "Stripe subscription created for user"
+                        createStripeEventAudit(event, {event: eventName, detail, description, status: "SUCCESS"}, subscription.referenceId)
+                    }
                 },
                 onSubscriptionUpdate: async ({event, subscription}) => {
-                    
+                    if (event) {
+                        const eventName = "Subscription updated"
+                        const detail = `Stripe subscription updated`
+                        const description = "Stripe subscription updated for user"
+                        createStripeEventAudit(event, {event: eventName, detail, description, status: "SUCCESS"}, subscription.referenceId)
+                    }                    
                 }
             }
         }),

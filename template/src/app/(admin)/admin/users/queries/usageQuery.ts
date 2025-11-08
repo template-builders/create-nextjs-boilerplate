@@ -24,12 +24,12 @@ export function useGetUsage(user: User | undefined, options: UseGetUsageOptions 
         throw new Error("Failed to load usage data.");
       }
 
-      const body: { usages: typeof usage.$inferSelect[]; plan: PlanProps } = await res.json();
+      const body: { usages: typeof usage.$inferSelect[], plan: PlanProps } = await res.json();
+      console.log(body)
       const result = body.usages.map((usage) => ({
         ...usage, 
         limit: userLimits[body.plan][usage.metric as MetricProps]
       }));
-
       const data = {usages: result, plan: body.plan} as UserUsageRecords
       return data
     },

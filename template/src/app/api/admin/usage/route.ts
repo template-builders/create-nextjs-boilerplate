@@ -18,7 +18,9 @@ export async function GET(request: NextRequest) {
     })
   ])
 
-  return NextResponse.json({usages, plan: subscription?.plan})
+  console.log(usages)
+
+  return NextResponse.json({usages, plan: subscription?.plan ?? "free"})
 }
 
 export async function POST(request: NextRequest) {

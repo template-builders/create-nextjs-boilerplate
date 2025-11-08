@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { auditLogs } from "@/db/schemas/audit";
-import { ilike, or } from "drizzle-orm";
+import { desc, ilike, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 export type AuditLogGetResponse = {
@@ -18,10 +18,11 @@ export async function GET(request: NextRequest) {
   let subquery = db.select().from(auditLogs).$dynamic()
   const original = await subquery.execute()
   
-
   if (offset) subquery = subquery.offset(parseInt(offset, 0))
   if (limit) subquery = subquery.limit(parseInt(limit, 10))
-  if (search) subquery = subquery.where(or(ilike(auditLogs.event, search), ilike(auditLogs.description, search), ilike(auditLogs.detail, search)))
+  if (search) subquery = subquery.where(or(ilike(auditLogs.event, `%${search}%`), ilike(auditLogs.description, `%${search}%`), ilike(auditLogs.detail, `%${search}%`)))
+
+  subquery = subquery.orderBy(desc(auditLogs.createdAt))
 
   const body: AuditLogGetResponse = {data: await subquery.execute(), totalLogs: original.length}
   return NextResponse.json(body)

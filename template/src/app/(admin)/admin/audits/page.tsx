@@ -11,13 +11,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Pagination,
   PaginationContent,
   PaginationItem,
@@ -34,6 +27,8 @@ import {
   MonitorSmartphone,
   Search
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 function formatDate(value?: string | Date | null) {
   if (!value) return "—";
@@ -67,17 +62,15 @@ const STATUS_META: Record<string, StatusMeta> = {
 };
 
 export default function AdminAuditLogsPage() {
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10)
+  const [goToPage, setGoToPage] = useState<number>(1)
   const auditData = useListAuditLogs();
-
-  useEffect(() => {
-    setSearchValue(auditData.search);
-  }, [auditData.search]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       auditData.setSearch(searchValue);
-    }, 350);
+    }, 400);
 
     return () => clearTimeout(timer);
   }, [searchValue, auditData]);
@@ -113,7 +106,7 @@ export default function AdminAuditLogsPage() {
             </CardDescription>
           </div>
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="flex w-full flex-col gap-8 sm:flex-row sm:items-center justify-center">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -123,21 +116,44 @@ export default function AdminAuditLogsPage() {
                   onChange={(event) => setSearchValue(event.target.value)}
                 />
               </div>
-              <Select
-                value={String(auditData.pageSize)}
-                onValueChange={(value) => auditData.setLimit(Number(value))}
-              >
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Rows per page" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[10, 25, 50, 100].map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {size} per page
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="rows" className="text-sm font-medium">Rows per page</Label>
+                <Input 
+                  id="rows"
+                  value={rowsPerPage}
+                  onChange={(event) =>{
+                    const value = parseInt(event.target.value) || 10
+                    setRowsPerPage(value)
+                    auditData.setLimit(value)
+                  }}
+                  min={1}
+                  max={100}
+                  type="number"
+                />
+              </div>
+              <div className="flex gap-4 items-center">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="rows" className="text-sm font-medium">Go to Page</Label>
+                  <Input 
+                    id="rows"
+                    value={goToPage}
+                    onChange={(event) =>{
+                      const value = parseInt(event.target.value) || 10
+                      setGoToPage(value)
+                    }}
+                    min={1}
+                    max={auditData.totalPages}
+                    type="number"
+                  />
+                </div>
+                <Button
+                  onClick={() => {
+                    auditData.setPage(goToPage)
+                  }}
+                >
+                  Go
+                </Button>
+              </div>
             </div>
             <Pagination>
               <PaginationContent>

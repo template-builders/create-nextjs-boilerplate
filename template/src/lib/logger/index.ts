@@ -4,9 +4,10 @@ import { getSessionInfo } from "@/utils/format"
 import { GenericEndpointContext } from "better-auth"
 import Stripe from "stripe"
 import { session, user } from "@/db/schemas/auth"
-import { desc, eq  } from "drizzle-orm"
+import { desc, eq, or  } from "drizzle-orm"
+import { auth } from "../authentication/auth"
 
-type AuditLogProps = {
+export type AuditLogProps = {
   event: string
   description: string
   detail: string
@@ -20,7 +21,7 @@ type AuditLogProps = {
   email?: string
 }
 
-type EventPayloadProps = {
+export type EventPayloadProps = {
   event: string
   description: string
   detail: string
@@ -31,7 +32,7 @@ async function getUserMetadata(referenceId: string | undefined) {
   if (!referenceId) return {}
    
   const res = await db.select().from(session)
-  .innerJoin(user, eq(user.id, session.userId))
+  .innerJoin(user, or(eq(user.id, session.userId), eq(user.email, referenceId)))
   .where(eq(user.id, referenceId))
   .orderBy(desc(session.createdAt))
   .limit(1)
@@ -46,7 +47,15 @@ async function getUserMetadata(referenceId: string | undefined) {
 
 export async function createBetterAuthAudit(ctx: GenericEndpointContext, eventData: EventPayloadProps, userId?: string) {
   const source = new URL(ctx.request?.url ?? "").pathname
-  const data = await getUserMetadata(userId)
+  const currentSession = await auth.api.getSession({headers: ctx.request?.headers!})
+
+  let data;
+
+  if (currentSession) {
+    const {browser, system, device} = getSessionInfo(currentSession.session.userAgent)
+    data = {browser, system, device, email: currentSession.user.email, referenceId: currentSession.user.id, sessionId: currentSession.session.id}
+  } else data = await getUserMetadata(userId)
+
   const {browser, system, device} = getSessionInfo(ctx.request?.headers.get("user-agent"))
 
   const payload = {...data, source, browser, system, device, ...eventData}
@@ -55,10 +64,17 @@ export async function createBetterAuthAudit(ctx: GenericEndpointContext, eventDa
 
 export async function createRequestAudit(request: Request, eventData: EventPayloadProps, userId?: string) {
   const source = new URL(request.url ?? "").pathname
-  const data = await getUserMetadata(userId)
+  const currentSession = await auth.api.getSession({ headers: request.headers })
+
+  let data;
+
+  if (currentSession) {
+    const {browser, system, device} = getSessionInfo(currentSession.session.userAgent)
+    data = {browser, system, device, email: currentSession.user.email, referenceId: currentSession.user.id, sessionId: currentSession.session.id}
+  } else data = await getUserMetadata(userId)
+
   const {browser, system, device} = getSessionInfo(request.headers.get("user-agent"))
 
-  
   const payload = {...data, source, browser, system, device, ...eventData}
   await sendAuditLog(payload)
 }
