@@ -1,4 +1,4 @@
-import { betterAuth } from "better-auth";
+import { APIError, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP, twoFactor, phoneNumber, admin, apiKey, createAuthMiddleware } from "better-auth/plugins";
 import { stripe } from "@better-auth/stripe"
@@ -146,8 +146,15 @@ export const auth = betterAuth({
         }
     },
     hooks: {
-        before: createAuthMiddleware(async (ctx) => {
-            console.log(ctx.path)
+        after: createAuthMiddleware(async (ctx) => {
+            const context = ctx.context.returned
+
+            if (context instanceof APIError) {
+                const event = "Authentication Error"
+                const detail = context.message
+                const description = "An authentication error occured"
+                createBetterAuthAudit(ctx, {event, detail, description, status: "FAILED"})
+            }
         })
     },
     trustedOrigins: [`${process.env.BETTER_AUTH_URL}`],
@@ -163,7 +170,7 @@ export const auth = betterAuth({
     logger: {
 		disabled: false,
 		disableColors: false,
-		level: "info",
+		level: "error",
 		log: (level, message, ...args) => {
 			console.log(`[${level}] ${message}`, ...args);
 		}

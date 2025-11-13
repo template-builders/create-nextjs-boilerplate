@@ -11,7 +11,8 @@
     "expose:stripe": "tsx scripts/stripe.ts",
     "migrate:gen": "drizzle-kit generate",
     "migrate:dev": "dotenv -e .env tsx scripts/migrate.ts",
-    "migrate:prod": "dotenv -e .env.prod tsx scripts/migrate.ts"
+    "migrate:prod": "dotenv -e .env.prod tsx scripts/migrate.ts",
+    "cron:subscription-cycle": "tsx src/lib/cron/tasks.ts"
   },
   "dependencies": {
     "@better-auth/stripe": "^1.3.27",
